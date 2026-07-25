@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 export async function GET(_req: Request) {
   try {
     void _req;
@@ -25,7 +25,7 @@ export async function GET(_req: Request) {
   }
 }
 
-export async function PATCH(_req: Request) {
+export async function PATCH() {
   try {
     const clerkUser = await currentUser();
     if (!clerkUser) return new NextResponse("Unauthorized", { status: 401 });
