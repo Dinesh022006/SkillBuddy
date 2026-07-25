@@ -74,7 +74,7 @@ export default async function CommunityDetailsPage({ params }: { params: { commu
 
           {community.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {community.tags.map(tag => (
+              {community.tags.map((tag: string) => (
                 <span key={tag} className="px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm">
                   {tag}
                 </span>
@@ -91,7 +91,7 @@ export default async function CommunityDetailsPage({ params }: { params: { commu
       <div className="w-full md:w-80 flex-shrink-0">
         <h2 className="text-xl font-bold mb-4">Members</h2>
         <div className="space-y-4">
-          {community.members.slice(0, 10).map(member => (
+          {community.members.slice(0, 10).map((member: { id: string; role: string; user: { name: string | null; avatarUrl: string | null } }) => (
             <div key={member.id} className="flex items-center gap-3 p-3 border rounded-lg bg-card">
               <Avatar className="w-10 h-10 shrink-0">
                 <AvatarImage src={member.user.avatarUrl || ""} />
