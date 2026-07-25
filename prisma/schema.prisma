@@ -1,0 +1,488 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String    @id @default(uuid())
+  clerkId      String    @unique
+  email        String    @unique
+  username     String?   @unique
+  firstName    String?
+  lastName     String?
+  fullName     String?
+  name         String?
+  avatarUrl    String?
+  imageUrl     String?
+  lastSignInAt DateTime?
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  profile            Profile?
+  communities        CommunityMember[]
+  teams              TeamMember[]
+  sentNotifications  Notification[]    @relation("NotificationSender")
+  notifications      Notification[]    @relation("NotificationReceiver")
+  recommendationsFor Recommendation[]  @relation("RecommendationTarget")
+  recommendationsOf  Recommendation[]  @relation("RecommendationSource")
+
+  connectionsInitiated Connection[] @relation("ConnectionRequester")
+  connectionsReceived  Connection[] @relation("ConnectionReceiver")
+
+  chatParticipants ChatParticipant[]
+  messages         Message[]
+
+  activities Activity[]
+  teamInvitationsSent     TeamInvitation[] @relation("Inviter")
+  teamInvitationsReceived TeamInvitation[] @relation("Invitee")
+  communityPosts CommunityPost[]
+  comments Comment[]
+  reactions Reaction[]
+
+  fileAssets FileAsset[]
+
+  aiLogs AILog[]
+}
+
+model Profile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  college      String?
+  branch       String?
+  year         Int?
+  bio          String?
+  careerGoal   String?
+  availability String?
+  languages    String[]
+  interests    String[]
+
+  githubUrl      String?
+  linkedinUrl    String?
+  leetcodeUrl    String?
+  portfolioUrl   String?
+  codechefUrl    String?
+  codeforcesUrl  String?
+  hackerrankUrl  String?
+  hackerearthUrl String?
+  kaggleUrl      String?
+  devfolioUrl    String?
+  behanceUrl     String?
+  resumeUrl      String?
+
+  completion Int @default(0)
+  xp         Int @default(0)
+  level      Int @default(1)
+
+  skills        UserSkill[]
+  learningGoals LearningGoal[]
+  verification  Verification?
+
+  userBadges       UserBadge[]
+  userAchievements UserAchievement[]
+  xpHistory        XPHistory[]
+  learningStreak   LearningStreak?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Skill {
+  id       String  @id @default(uuid())
+  name     String  @unique
+  category String?
+
+  userSkills    UserSkill[]
+  learningGoals LearningGoal[]
+
+  createdAt DateTime @default(now())
+}
+
+model UserSkill {
+  id        String  @id @default(uuid())
+  profileId String
+  skillId   String
+  level     String?
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  skill   Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, skillId])
+}
+
+model LearningGoal {
+  id        String @id @default(uuid())
+  profileId String
+  skillId   String
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  skill   Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, skillId])
+}
+
+model Community {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+  bannerUrl   String?
+
+  members CommunityMember[]
+  posts   CommunityPost[]
+
+  tags       String[]
+  visibility String   @default("PUBLIC")
+  chatRoomId String?  @unique
+  chatRoom   ChatRoom? @relation(fields: [chatRoomId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CommunityMember {
+  id          String @id @default(uuid())
+  userId      String
+  communityId String
+  role        String @default("MEMBER")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  joinedAt DateTime @default(now())
+
+  @@unique([userId, communityId])
+}
+
+model Team {
+  id             String   @id @default(uuid())
+  name           String
+  description    String?
+  requiredSkills String[]
+  maxMembers     Int      @default(4)
+  hackathonName  String?
+  status         String   @default("LOOKING_FOR_MEMBERS")
+
+  members     TeamMember[]
+  invitations TeamInvitation[]
+
+  chatRoomId String?   @unique
+  chatRoom   ChatRoom? @relation(fields: [chatRoomId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TeamMember {
+  id     String @id @default(uuid())
+  teamId String
+  userId String
+  role   String @default("MEMBER")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  joinedAt DateTime @default(now())
+
+  @@unique([teamId, userId])
+}
+
+model Recommendation {
+  id           String @id @default(uuid())
+  sourceUserId String
+  targetUserId String
+  score        Float
+  type         String
+
+  sourceUser User @relation("RecommendationSource", fields: [sourceUserId], references: [id], onDelete: Cascade)
+  targetUser User @relation("RecommendationTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  aiInsight AIInsight?
+
+  @@unique([sourceUserId, targetUserId, type])
+}
+
+model AIInsight {
+  id                       String @id @default(uuid())
+  recommendationId         String @unique
+  matchSummary             String
+  sharedSkills             String[]
+  complementarySkills      String[]
+  collaborationSuggestions String[]
+  recommendedProjects      String[]
+  learningOpportunities    String[]
+  confidenceScore          Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  recommendation Recommendation @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
+}
+
+model Verification {
+  id          String  @id @default(uuid())
+  profileId   String  @unique
+  status      String  @default("PENDING")
+  documentUrl String?
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id       String  @id @default(uuid())
+  userId   String
+  senderId String?
+  type     String
+  title    String
+  message  String
+  read     Boolean @default(false)
+  link     String?
+
+  user   User  @relation("NotificationReceiver", fields: [userId], references: [id], onDelete: Cascade)
+  sender User? @relation("NotificationSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model Connection {
+  id          String @id @default(uuid())
+  requesterId String
+  receiverId  String
+  status      String @default("PENDING")
+
+  requester User @relation("ConnectionRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiver  User @relation("ConnectionReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([requesterId, receiverId])
+}
+
+model ChatRoom {
+  id   String  @id @default(uuid())
+  type String  @default("DIRECT")
+  name String?
+
+  participants ChatParticipant[]
+  messages     Message[]
+
+  community Community?
+  team      Team?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ChatParticipant {
+  id     String @id @default(uuid())
+  roomId String
+  userId String
+
+  room ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  joinedAt DateTime @default(now())
+
+  @@unique([roomId, userId])
+}
+
+model Message {
+  id            String   @id @default(uuid())
+  content       String
+  roomId        String
+  senderId      String
+  attachmentUrl String?
+  seenBy        String[]
+
+  room   ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FileAsset {
+  id      String @id @default(uuid())
+  url     String
+  fileKey String @unique
+  userId  String
+  type    String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model CommunityPost {
+  id          String   @id @default(uuid())
+  communityId String
+  authorId    String
+  content     String
+  isPinned    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  reactions Reaction[]
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  postId    String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  reactions Reaction[]
+}
+
+model Reaction {
+  id        String   @id @default(uuid())
+  postId    String?
+  commentId String?
+  userId    String
+  emoji     String
+  createdAt DateTime @default(now())
+
+  post    CommunityPost? @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment Comment?       @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId, emoji])
+  @@unique([userId, commentId, emoji])
+}
+
+model TeamInvitation {
+  id        String   @id @default(uuid())
+  teamId    String
+  inviterId String
+  inviteeId String
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  team    Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  inviter User @relation("Inviter", fields: [inviterId], references: [id], onDelete: Cascade)
+  invitee User @relation("Invitee", fields: [inviteeId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, inviteeId])
+}
+
+model Activity {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ==========================================
+// GAMIFICATION
+// ==========================================
+
+model Badge {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String
+  imageUrl    String?
+  category    String?
+  createdAt   DateTime @default(now())
+
+  userBadges UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(uuid())
+  profileId String
+  badgeId   String
+  earnedAt  DateTime @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  badge   Badge   @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, badgeId])
+}
+
+model Achievement {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String
+  xpReward    Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            String   @id @default(uuid())
+  profileId     String
+  achievementId String
+  earnedAt      DateTime @default(now())
+
+  profile     Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, achievementId])
+}
+
+model XPHistory {
+  id        String   @id @default(uuid())
+  profileId String
+  amount    Int
+  reason    String
+  createdAt DateTime @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model LearningStreak {
+  id               String   @id @default(uuid())
+  profileId        String   @unique
+  currentStreak    Int      @default(0)
+  longestStreak    Int      @default(0)
+  lastActivityDate DateTime @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+// ==========================================
+// AI RECOMMENDATION ENGINE
+// ==========================================
+
+model AIPromptCache {
+  id         String   @id @default(uuid())
+  promptHash String   @unique
+  response   Json
+  version    String
+  createdAt  DateTime @default(now())
+}
+
+model AILog {
+  id               String   @id @default(uuid())
+  userId           String
+  feature          String
+  promptTokens     Int      @default(0)
+  completionTokens Int      @default(0)
+  totalTokens      Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
