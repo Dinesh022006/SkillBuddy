@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/set-state-in-effect */
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -11,25 +10,73 @@ import { Search, Users, Users2, FileText, Loader2, Network } from "lucide-react"
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+type SearchResults = {
+  users: {
+    id: string;
+    imageUrl: string | null;
+    fullName: string | null;
+    username: string | null;
+    profile: {
+      branch: string | null;
+      college: string | null;
+      skills: {
+        skill: {
+          id: string;
+          name: string;
+        };
+      }[];
+    } | null;
+  }[];
+  communities: {
+    id: string;
+    name: string;
+    description: string | null;
+  }[];
+  teams: {
+    id: string;
+    name: string;
+    description: string | null;
+  }[];
+  posts: {
+    id: string;
+    content: string;
+    author: {
+      imageUrl: string | null;
+      fullName: string | null;
+    };
+    community: {
+      name: string;
+    };
+  }[];
+};
+
 export default function GlobalSearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
   
   const [searchTerm, setSearchTerm] = useState(query);
-  const [results, setResults] = useState<any>(null);
+  const [results, setResults] = useState<SearchResults | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Trigger search when URL query param changes
   useEffect(() => {
     if (!query) return;
     let cancelled = false;
-    setLoading(true);
-    fetch(`/api/search?q=${encodeURIComponent(query)}&type=all`)
-      .then((r) => r.json())
-      .then((data) => { if (!cancelled) setResults(data); })
-      .catch(console.error)
-      .finally(() => { if (!cancelled) setLoading(false); });
+    const performSearch = async () => {
+      setLoading(true);
+      try {
+        const r = await fetch(`/api/search?q=${encodeURIComponent(query)}&type=all`);
+        const data = await r.json();
+        if (!cancelled) setResults(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    
+    void performSearch();
     return () => { cancelled = true; };
   }, [query]);
 
@@ -70,7 +117,7 @@ export default function GlobalSearchPage() {
             <section>
               <h2 className="text-2xl font-bold mb-4 flex items-center border-b pb-2"><Users className="mr-2" /> Users</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {results.users.map((user: any) => (
+                {results.users.map((user) => (
                   <Link key={user.id} href={`/profile/${user.id}`}>
                       <Card className="hover:-translate-y-1 hover:shadow-md hover:border-primary/40 transition-all duration-300 cursor-pointer h-full flex flex-col">
                         <CardContent className="flex flex-col p-5 flex-1">
@@ -91,7 +138,7 @@ export default function GlobalSearchPage() {
                           
                           {user.profile?.skills && user.profile.skills.length > 0 && (
                             <div className="flex flex-wrap gap-1.5 mt-auto mb-4">
-                              {user.profile.skills.slice(0, 3).map((s: any) => (
+                              {user.profile.skills.slice(0, 3).map((s) => (
                                 <span key={s.skill.id} className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-[10px]">
                                   {s.skill.name}
                                 </span>
@@ -120,7 +167,7 @@ export default function GlobalSearchPage() {
             <section>
               <h2 className="text-2xl font-bold mb-4 flex items-center border-b pb-2"><Network className="mr-2" /> Communities</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {results.communities.map((comm: any) => (
+                {results.communities.map((comm) => (
                   <Link key={comm.id} href={`/communities/${comm.id}`}>
                     <Card className="hover:border-primary transition-colors cursor-pointer h-full">
                       <CardContent className="p-4">
@@ -139,7 +186,7 @@ export default function GlobalSearchPage() {
             <section>
               <h2 className="text-2xl font-bold mb-4 flex items-center border-b pb-2"><Users2 className="mr-2" /> Teams</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {results.teams.map((team: any) => (
+                {results.teams.map((team) => (
                   <Link key={team.id} href={`/teams/${team.id}`}>
                     <Card className="hover:border-primary transition-colors cursor-pointer h-full">
                       <CardContent className="p-4">
@@ -158,7 +205,7 @@ export default function GlobalSearchPage() {
             <section>
               <h2 className="text-2xl font-bold mb-4 flex items-center border-b pb-2"><FileText className="mr-2" /> Posts</h2>
               <div className="grid grid-cols-1 gap-4">
-                {results.posts.map((post: any) => (
+                {results.posts.map((post) => (
                   <Card key={post.id}>
                     <CardContent className="p-4">
                       <div className="flex items-center mb-2">
@@ -177,7 +224,7 @@ export default function GlobalSearchPage() {
             </section>
           )}
 
-          {Object.values(results).every((arr: any) => arr.length === 0) && (
+          {Object.values(results).every((arr) => Array.isArray(arr) && arr.length === 0) && (
             <div className="text-center py-20 text-muted-foreground">
               No results found for &quot;{query}&quot;
             </div>

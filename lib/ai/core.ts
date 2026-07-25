@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 
@@ -12,7 +12,7 @@ function hashPrompt(prompt: string, version: string): string {
 }
 
 // Extract JSON strictly if model wraps it in markdown blocks
-function extractJson(text: string): any {
+function extractJson(text: string): unknown {
   try {
     // Attempt direct parse first
     return JSON.parse(text);
@@ -26,13 +26,13 @@ function extractJson(text: string): any {
   }
 }
 
-export async function generateStructuredAIInsight(
+export async function generateStructuredAIInsight<T = unknown>(
   prompt: string, 
   version: string, 
   userId: string,
   featureName: string,
   forceRefresh: boolean = false
-): Promise<any> {
+): Promise<T> {
   if (!genAI) {
     throw new Error("GEMINI_API_KEY is not configured.");
   }
@@ -44,8 +44,8 @@ export async function generateStructuredAIInsight(
     const cached = await prisma.aIPromptCache.findUnique({
       where: { promptHash },
     });
-    if (cached) {
-      return cached.response;
+    if (cached && cached.response) {
+      return cached.response as T;
     }
   }
 
@@ -80,15 +80,15 @@ export async function generateStructuredAIInsight(
     // Cache the result
     await prisma.aIPromptCache.upsert({
       where: { promptHash },
-      update: { response: json, version },
+      update: { response: json as Prisma.InputJsonValue, version },
       create: {
         promptHash,
-        response: json,
+        response: json as Prisma.InputJsonValue,
         version,
       }
     });
 
-    return json;
+    return json as T;
   } catch (error) {
     console.error(`[AI_ERROR] Feature: ${featureName}`, error);
     throw error;
