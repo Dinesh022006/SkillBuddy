@@ -28,7 +28,7 @@ export default async function CommunityDetailsPage({ params }: { params: { commu
 
   if (!community) notFound();
 
-  const isMember = dbUser ? community.members.some(m => m.userId === dbUser.id) : false;
+  const isMember = dbUser ? community.members.some((m: { userId: string }) => m.userId === dbUser.id) : false;
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-4 flex flex-col md:flex-row gap-8">
