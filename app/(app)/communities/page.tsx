@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Users } from "lucide-react";
@@ -8,6 +9,14 @@ export const metadata: Metadata = {
   title: "Communities - SkillBuddy AI",
   description: "Find and join communities.",
 };
+
+type CommunityWithCounts = Prisma.CommunityGetPayload<{
+  include: {
+    _count: {
+      select: { members: true; posts: true };
+    };
+  };
+}>;
 
 export default async function CommunitiesPage() {
   const communities = await prisma.community.findMany({
@@ -35,7 +44,7 @@ export default async function CommunitiesPage() {
             No communities found. Be the first to create one!
           </div>
         ) : (
-          communities.map(community => (
+          communities.map((community: CommunityWithCounts) => (
             <Link key={community.id} href={`/communities/${community.id}`} className="block">
               <div className="border rounded-lg p-6 hover:border-primary/50 hover:-translate-y-1 hover:shadow-md transition-all duration-300 bg-card h-full flex flex-col">
                 <div className="flex items-center gap-3 mb-4">
@@ -56,7 +65,7 @@ export default async function CommunitiesPage() {
                 )}
                 {community.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-auto">
-                    {community.tags.slice(0, 3).map(tag => (
+                    {community.tags.slice(0, 3).map((tag: string) => (
                       <span key={tag} className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs">
                         {tag}
                       </span>
