@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -55,6 +56,7 @@
     "seed": "ts-node --compiler-options {\\module\\:\\CommonJS\\} prisma/seed.ts"
   },
   "allowScripts": {
+    "@prisma/client@7.9.0": true,
     "@prisma/engines@7.9.0": true,
     "prisma@7.9.0": true,
     "sharp@0.34.5": true,

@@ -1,0 +1,1 @@
+import { prisma } from './lib/prisma'; type T = typeof prisma; console.log(Object.keys(prisma));
