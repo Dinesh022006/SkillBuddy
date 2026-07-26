@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
+
 
 export async function GET(req: Request) {
   try {
@@ -20,7 +20,7 @@ export async function GET(req: Request) {
     const skip = (page - 1) * limit;
 
     // Base query: find users other than current user
-    const whereClause: Prisma.UserWhereInput = {
+    const whereClause: NonNullable<Parameters<typeof prisma.user.findMany>[0]>["where"] = {
       id: { not: dbUser.id },
       deletedAt: null
     };

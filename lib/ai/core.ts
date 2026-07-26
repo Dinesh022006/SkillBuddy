@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { Prisma } from "@prisma/client";
+
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 
@@ -80,10 +80,10 @@ export async function generateStructuredAIInsight<T = unknown>(
     // Cache the result
     await prisma.aIPromptCache.upsert({
       where: { promptHash },
-      update: { response: json as Prisma.InputJsonValue, version },
+      update: { response: json as object, version },
       create: {
         promptHash,
-        response: json as Prisma.InputJsonValue,
+        response: json as object,
         version,
       }
     });

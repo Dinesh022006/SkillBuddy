@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { Community } from "@prisma/client";
+
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Users } from "lucide-react";
@@ -10,15 +10,10 @@ export const metadata: Metadata = {
   description: "Find and join communities.",
 };
 
-interface CommunityWithCounts extends Community {
-  _count: {
-    members: number;
-    posts: number;
-  };
-}
+
 
 export default async function CommunitiesPage() {
-  const communities: CommunityWithCounts[] = await prisma.community.findMany({
+  const communities = await prisma.community.findMany({
     include: {
       _count: {
         select: { members: true, posts: true }
