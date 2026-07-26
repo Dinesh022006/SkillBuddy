@@ -35,22 +35,22 @@ export default async function CommunityDetailsPage({ params }: { params: { commu
       {/* Main Feed Column */}
       <div className="flex-1">
         <div className="bg-card border rounded-lg p-8 mb-8">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight mb-2">{community.name}</h1>
-              <div className="flex items-center gap-4 text-muted-foreground">
-                <span className="flex items-center gap-1">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-3xl font-bold tracking-tight mb-2 break-words">{community.name}</h1>
+              <div className="flex items-center gap-4 text-muted-foreground flex-wrap">
+                <span className="flex items-center gap-1 shrink-0">
                   <Users className="h-4 w-4" />
                   {community.members.length} Members
                 </span>
                 {community.visibility === "PRIVATE" && (
-                  <span className="bg-destructive/10 text-destructive px-2 py-0.5 rounded text-sm font-medium">
+                  <span className="bg-destructive/10 text-destructive px-2 py-0.5 rounded text-sm font-medium shrink-0">
                     Private
                   </span>
                 )}
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 shrink-0">
               {isMember ? (
                 community.chatRoomId ? (
                   <Link href={`/chat/${community.chatRoomId}`}>
@@ -92,18 +92,20 @@ export default async function CommunityDetailsPage({ params }: { params: { commu
         <h2 className="text-xl font-bold mb-4">Members</h2>
         <div className="space-y-4">
           {community.members.slice(0, 10).map((member) => (
-            <div key={member.id} className="flex items-center gap-3 p-3 border rounded-lg bg-card">
-              <Avatar className="w-10 h-10 shrink-0">
-                <AvatarImage src={member.user.avatarUrl || ""} />
-                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                  {member.user.name?.charAt(0)?.toUpperCase() ?? "U"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="overflow-hidden">
-                <p className="font-medium text-sm truncate">{member.user.name || "Anonymous User"}</p>
-                <p className="text-xs text-muted-foreground">{member.role}</p>
+            <Link key={member.id} href={`/profile/${member.userId}`} className="block">
+              <div className="flex items-center gap-3 p-3 border rounded-lg bg-card hover:border-primary/50 transition-colors">
+                <Avatar className="w-10 h-10 shrink-0">
+                  <AvatarImage src={member.user.avatarUrl || ""} />
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                    {member.user.name?.charAt(0)?.toUpperCase() ?? "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="overflow-hidden">
+                  <p className="font-medium text-sm truncate">{member.user.name || "Anonymous User"}</p>
+                  <p className="text-xs text-muted-foreground">{member.role}</p>
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
           {community.members.length > 10 && (
             <Button variant="outline" className="w-full text-sm">View all {community.members.length} members</Button>

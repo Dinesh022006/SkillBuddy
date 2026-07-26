@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Search, UserPlus, Check, Loader2, Sparkles, BrainCircuit } from "lucide-react"
 import { toast } from "@/components/ui/toast"
+import Link from "next/link"
 
 interface DiscoverUser {
   id: string;
@@ -165,16 +166,18 @@ export default function DiscoverPage() {
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 shrink-0">
+                        <Link href={`/profile/${user.id}`} className="shrink-0 hover:opacity-80 transition-opacity">
                           <Avatar className="w-12 h-12">
                             <AvatarImage src={user.avatarUrl || ""} />
                             <AvatarFallback className="bg-primary/20 text-primary font-bold text-xl">
                               {initial}
                             </AvatarFallback>
                           </Avatar>
-                        </div>
-                        <div>
-                          <CardTitle className="text-lg">{nameStr}</CardTitle>
+                        </Link>
+                        <div className="min-w-0">
+                          <Link href={`/profile/${user.id}`} className="hover:underline">
+                            <CardTitle className="text-lg truncate">{nameStr}</CardTitle>
+                          </Link>
                           <CardDescription className="line-clamp-1">{user.profile?.college || "No College"} • {user.profile?.branch || "No Branch"}</CardDescription>
                         </div>
                       </div>

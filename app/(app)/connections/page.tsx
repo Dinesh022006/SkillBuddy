@@ -134,16 +134,16 @@ export default function ConnectionsPage() {
       </div>
 
       <Tabs defaultValue="connected">
-        <TabsList>
-          <TabsTrigger value="connected">
+        <TabsList className="w-full justify-start overflow-x-auto h-auto flex-nowrap shrink-0">
+          <TabsTrigger value="connected" className="shrink-0">
             <UserCheck className="w-4 h-4 mr-2" />
             Connected ({accepted.length})
           </TabsTrigger>
-          <TabsTrigger value="incoming">
+          <TabsTrigger value="incoming" className="shrink-0">
             <Clock className="w-4 h-4 mr-2" />
             Requests ({incoming.length})
           </TabsTrigger>
-          <TabsTrigger value="sent">
+          <TabsTrigger value="sent" className="shrink-0">
             <Loader2 className="w-4 h-4 mr-2" />
             Sent ({outgoing.length})
           </TabsTrigger>

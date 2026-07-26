@@ -88,18 +88,20 @@ export default async function TeamDetailsPage({ params }: { params: { teamId: st
         <h2 className="text-2xl font-bold mb-4">Members</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {team.members.map(member => (
-            <div key={member.id} className="flex items-center gap-4 p-4 border rounded-lg bg-card">
-              <Avatar className="w-12 h-12">
-                <AvatarImage src={member.user.avatarUrl || ""} />
-                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                  {member.user.name?.charAt(0)?.toUpperCase() ?? "U"}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-medium">{member.user.name || "Anonymous User"}</p>
-                <p className="text-sm text-muted-foreground">{member.role}</p>
+            <Link key={member.id} href={`/profile/${member.userId}`} className="block">
+              <div className="flex items-center gap-4 p-4 border rounded-lg bg-card hover:border-primary/50 transition-colors">
+                <Avatar className="w-12 h-12 shrink-0">
+                  <AvatarImage src={member.user.avatarUrl || ""} />
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                    {member.user.name?.charAt(0)?.toUpperCase() ?? "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <p className="font-medium truncate">{member.user.name || "Anonymous User"}</p>
+                  <p className="text-sm text-muted-foreground truncate">{member.role}</p>
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

@@ -18,6 +18,11 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
+import { Button } from "@/components/ui/button"
+import { Menu } from "lucide-react"
+import { useState } from "react"
+
 const sidebarLinks = [
   { name: 'Dashboard',    href: '/dashboard',     icon: LayoutDashboard },
   { name: 'Discover',     href: '/discover',      icon: Compass },
@@ -32,21 +37,21 @@ const sidebarLinks = [
   { name: 'Settings',     href: '/settings',      icon: Settings },
 ]
 
-export function Sidebar() {
+function SidebarContent({ onClick }: { onClick?: () => void }) {
   const pathname = usePathname()
 
   return (
-    <div className="flex h-full w-64 flex-col border-r bg-sidebar text-sidebar-foreground">
+    <div className="flex h-full w-full flex-col bg-sidebar text-sidebar-foreground">
       {/* Logo */}
-      <div className="flex h-14 items-center border-b px-4">
-        <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl text-primary">
+      <div className="flex h-14 items-center border-b px-4 shrink-0">
+        <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl text-primary" onClick={onClick}>
           <Compass className="h-6 w-6" />
           <span>SkillBuddy AI</span>
         </Link>
       </div>
 
       {/* Nav */}
-      <div className="flex-1 overflow-y-auto py-4">
+      <div className="flex-1 overflow-y-auto py-4 scrollbar-thin">
         <nav className="grid gap-1 px-2">
           {sidebarLinks.map((link) => {
             const Icon = link.icon
@@ -56,14 +61,15 @@ export function Sidebar() {
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={onClick}
                 className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                  'flex items-center gap-3 rounded-md px-3 py-2 min-h-[44px] text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                   isActive
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                     : 'text-muted-foreground'
                 )}
               >
-                <Icon className="h-4 w-4" />
+                <Icon className="h-5 w-5 shrink-0" />
                 {link.name}
               </Link>
             )
@@ -72,12 +78,41 @@ export function Sidebar() {
       </div>
 
       {/* Footer */}
-      <div className="border-t p-4 flex items-center justify-between">
+      <div className="border-t p-4 flex items-center justify-between shrink-0">
         <p className="text-xs text-muted-foreground">
           SkillBuddy AI &copy; {new Date().getFullYear()}
         </p>
         <UserButton />
       </div>
     </div>
+  )
+}
+
+export function Sidebar() {
+  return (
+    <div className="hidden md:flex h-full w-64 flex-col border-r bg-sidebar text-sidebar-foreground">
+      <SidebarContent />
+    </div>
+  )
+}
+
+export function MobileNav() {
+  const [open, setOpen] = useState(false)
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger
+        render={
+          <Button variant="ghost" size="icon" className="md:hidden" />
+        }
+      >
+        <Menu className="h-6 w-6" />
+        <span className="sr-only">Toggle Menu</span>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-72 p-0 border-r-0">
+        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+        <SheetDescription className="sr-only">Navigate through the app</SheetDescription>
+        <SidebarContent onClick={() => setOpen(false)} />
+      </SheetContent>
+    </Sheet>
   )
 }

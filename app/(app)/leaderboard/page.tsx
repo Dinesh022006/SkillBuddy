@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trophy, Flame } from "lucide-react";
+import Link from "next/link";
 
 export default async function LeaderboardPage() {
   const clerkUser = await currentUser();
@@ -61,28 +62,32 @@ export default async function LeaderboardPage() {
                         : "bg-card hover:bg-accent/5"
                     }`}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 pr-2">
                       <div className="w-8 flex justify-center shrink-0">{rankIcon}</div>
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={avatar || ""} alt={name} />
-                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                          {initial}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
+                      <Link href={`/profile/${profile.userId}`} className="shrink-0 hover:opacity-80 transition-opacity">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={avatar || ""} alt={name} />
+                          <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                            {initial}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Link>
+                      <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="font-semibold text-sm">{name}</p>
+                          <Link href={`/profile/${profile.userId}`} className="hover:underline">
+                            <p className="font-semibold text-sm truncate">{name}</p>
+                          </Link>
                           {isCurrentUser && (
-                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">You</Badge>
+                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 shrink-0">You</Badge>
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-muted-foreground truncate">
                           {profile.college || profile.branch || "Student"}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-5">
+                    <div className="flex items-center gap-3 sm:gap-5 shrink-0">
                       {profile.learningStreak && profile.learningStreak.currentStreak > 0 && (
                         <div className="hidden sm:flex flex-col items-center">
                           <span className="text-xs text-muted-foreground">Streak</span>

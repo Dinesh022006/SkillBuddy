@@ -450,7 +450,7 @@ export function ProfileClient({ initialData }: { initialData: InitialProfileData
             </CardHeader>
             <CardContent>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
                     <Input id="firstName" {...form.register("firstName")} />
@@ -464,7 +464,7 @@ export function ProfileClient({ initialData }: { initialData: InitialProfileData
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="college">College</Label>
                     <Input id="college" {...form.register("college")} placeholder="e.g. IIT Bombay" />
@@ -475,7 +475,7 @@ export function ProfileClient({ initialData }: { initialData: InitialProfileData
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="year">Year of Study</Label>
                     <Input

@@ -21,7 +21,7 @@ export default async function TeamsPage() {
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-4">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Teams</h1>
           <p className="text-muted-foreground mt-1">Join a team or create your own to collaborate on projects.</p>
