@@ -30,7 +30,7 @@ export default async function TeamDetailsPage({ params }: { params: { teamId: st
   const isMember = dbUser ? team.members.some(m => m.userId === dbUser.id) : false;
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4">
+    <div className="w-full">
       <div className="bg-card border rounded-lg p-8 mb-8">
         <div className="flex justify-between items-start mb-6">
           <div>

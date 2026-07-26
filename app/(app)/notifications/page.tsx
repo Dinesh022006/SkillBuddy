@@ -79,7 +79,7 @@ export default function NotificationsPage() {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
-    <div className="space-y-6 max-w-3xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
@@ -107,16 +107,18 @@ export default function NotificationsPage() {
           ))}
         </div>
       ) : notifications.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
-            <Bell className="w-12 h-12 opacity-20" />
-            <p className="font-semibold text-lg text-foreground">You&apos;re all caught up!</p>
-            <p className="text-sm text-center max-w-sm">When you connect with others, join teams, or receive AI recommendations, your notifications will appear here.</p>
-            <Button variant="outline" className="mt-4" onClick={() => window.location.href = '/discover'}>
-              Find Collaborators
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in duration-500">
+          <div className="bg-primary/5 p-6 rounded-full mb-6 relative">
+            <Bell className="h-12 w-12 text-primary/40" />
+          </div>
+          <h3 className="text-2xl font-bold tracking-tight mb-2">You&apos;re all caught up!</h3>
+          <p className="text-muted-foreground max-w-md mx-auto mb-6">
+            When you connect with others, join teams, or receive AI recommendations, your notifications will appear here.
+          </p>
+          <Button variant="outline" className="transition-transform hover:scale-105" onClick={() => window.location.href = '/discover'}>
+            Find Collaborators
+          </Button>
+        </div>
       ) : (
         <div className="space-y-3">
           {notifications.map((notification) => {

@@ -20,7 +20,7 @@ export default async function LeaderboardPage() {
   });
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 space-y-8">
+    <div className="w-full space-y-8">
       <div className="text-center space-y-2">
         <Trophy className="w-16 h-16 text-yellow-500 mx-auto" />
         <h1 className="text-4xl font-extrabold tracking-tight">Global Leaderboard</h1>
@@ -34,9 +34,14 @@ export default async function LeaderboardPage() {
         </CardHeader>
         <CardContent>
           {topProfiles.length === 0 ? (
-            <div className="text-center text-muted-foreground py-12">
-              <Trophy className="w-12 h-12 mx-auto mb-3 opacity-20" />
-              <p>No rankings yet. Start collaborating to earn XP!</p>
+            <div className="flex flex-col items-center justify-center py-20 px-4 text-center animate-in fade-in duration-500">
+              <div className="bg-primary/5 p-6 rounded-full mb-6 relative">
+                <Trophy className="h-12 w-12 text-primary/40" />
+              </div>
+              <h3 className="text-2xl font-bold tracking-tight mb-2">No rankings yet</h3>
+              <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                Start collaborating, joining teams, and building your profile to earn XP and climb the leaderboard!
+              </p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -56,10 +61,10 @@ export default async function LeaderboardPage() {
                 return (
                   <div
                     key={profile.id}
-                    className={`flex items-center justify-between p-4 border rounded-xl transition-colors ${
+                    className={`flex items-center justify-between p-4 border rounded-xl transition-all duration-300 ${
                       isCurrentUser
-                        ? "bg-primary/5 border-primary/40 ring-1 ring-primary/20"
-                        : "bg-card hover:bg-accent/5"
+                        ? "bg-primary/5 border-primary/30 shadow-md ring-1 ring-primary/20 scale-[1.01]"
+                        : "bg-card hover:bg-muted/30 hover:shadow-md hover:-translate-y-1 hover:border-primary/20"
                     }`}
                   >
                     <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 pr-2">

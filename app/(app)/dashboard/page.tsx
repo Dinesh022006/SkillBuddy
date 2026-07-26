@@ -14,7 +14,7 @@ export default async function DashboardPage() {
   const name = clerkUser.firstName || clerkUser.username || "User";
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4">
+    <div className="w-full">
       <DashboardClient userName={name} />
     </div>
   );

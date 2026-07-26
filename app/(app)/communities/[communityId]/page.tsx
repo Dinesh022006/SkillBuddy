@@ -31,7 +31,7 @@ export default async function CommunityDetailsPage({ params }: { params: { commu
   const isMember = dbUser ? community.members.some((m) => m.userId === dbUser.id) : false;
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4 flex flex-col md:flex-row gap-8">
+    <div className="w-full py-8 px-4 flex flex-col md:flex-row gap-8">
       {/* Main Feed Column */}
       <div className="flex-1">
         <div className="bg-card border rounded-lg p-8 mb-8">

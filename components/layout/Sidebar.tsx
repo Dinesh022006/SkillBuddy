@@ -63,13 +63,16 @@ function SidebarContent({ onClick }: { onClick?: () => void }) {
                 href={link.href}
                 onClick={onClick}
                 className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2 min-h-[44px] text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 min-h-[44px] text-sm font-medium transition-all duration-200 group',
                   isActive
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                    : 'text-muted-foreground'
+                    ? 'bg-primary/10 text-primary font-semibold shadow-sm'
+                    : 'text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                 )}
               >
-                <Icon className="h-5 w-5 shrink-0" />
+                <Icon className={cn(
+                  "h-5 w-5 shrink-0 transition-colors",
+                  isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                )} />
                 {link.name}
               </Link>
             )

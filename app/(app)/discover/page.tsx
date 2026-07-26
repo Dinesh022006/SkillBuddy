@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Search, UserPlus, Check, Loader2, Sparkles, BrainCircuit } from "lucide-react"
+import { Search, UserPlus, Check, Loader2, Sparkles, BrainCircuit, Users } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "@/components/ui/toast"
 import Link from "next/link"
 
@@ -137,20 +138,33 @@ export default function DiscoverPage() {
       </div>
 
       {loading && page === 1 ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 pt-4 animate-in fade-in duration-500">
+          {[...Array(10)].map((_, i) => (
+            <div key={i} className="flex flex-col gap-4 rounded-xl border p-6">
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+              </div>
+              <Skeleton className="h-[200px] w-full rounded-lg" />
+            </div>
+          ))}
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 pt-4">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 pt-4">
           {users.length === 0 ? (
-            <div className="col-span-full flex flex-col items-center justify-center py-16 px-4 text-center">
-              <div className="bg-muted/50 p-4 rounded-full mb-4">
-                <Search className="h-8 w-8 text-muted-foreground" />
+            <div className="col-span-full flex flex-col items-center justify-center py-20 px-4 text-center animate-in fade-in duration-500">
+              <div className="bg-primary/5 p-6 rounded-full mb-6 relative">
+                <Users className="h-12 w-12 text-primary/40" />
+                <Search className="h-6 w-6 text-primary absolute bottom-4 right-4 bg-background rounded-full p-0.5" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">No collaborators found</h3>
-              <p className="text-muted-foreground max-w-md">
+              <h3 className="text-2xl font-bold tracking-tight mb-2">No collaborators found</h3>
+              <p className="text-muted-foreground max-w-md mx-auto mb-6">
                 We couldn&apos;t find anyone matching your search criteria. Try adjusting your filters, searching for different skills, or check back later!
               </p>
+              <Button variant="outline" onClick={() => setSearchQuery("")}>Clear Search</Button>
             </div>
           ) : (
             users.map((user) => {
@@ -162,7 +176,7 @@ export default function DiscoverPage() {
               const initial = nameStr.charAt(0);
 
               return (
-                <Card key={user.id} className="flex flex-col hover:border-primary/50 transition-colors">
+                <Card key={user.id} className="flex flex-col hover:-translate-y-1 hover:shadow-lg hover:border-primary/40 transition-all duration-300 rounded-xl">
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-3">
@@ -195,7 +209,7 @@ export default function DiscoverPage() {
                   <CardContent className="flex-1 space-y-4">
                     
                     {/* AI Insight Section */}
-                    <div className="rounded-lg bg-accent/5 p-4 border border-accent/10 relative">
+                    <div className="rounded-lg bg-accent/5 p-4 border border-accent/10 relative h-full flex flex-col">
                       <BrainCircuit className="absolute top-2 right-2 h-4 w-4 text-accent/40" />
                       {aiInsight ? (
                         <div className="space-y-4">
@@ -254,7 +268,7 @@ export default function DiscoverPage() {
                         </div>
                       ) : (
                         <div className="flex flex-col items-center justify-center py-4 space-y-3">
-                          <p className="text-xs text-center text-muted-foreground">Discover how you and {nameStr} can collaborate.</p>
+                          <p className="text-xs text-center text-muted-foreground flex-1 flex items-center justify-center">Discover how you and {nameStr} can collaborate.</p>
                           <Button variant="outline" size="sm" onClick={() => generateAIInsight(user.id)} className="h-8 text-xs">
                             ✨ Analyze Compatibility
                           </Button>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
   Users, MessageSquare, BrainCircuit,
@@ -42,8 +43,13 @@ export default function DashboardClient({ userName }: { userName: string }) {
 
   if (loading) {
     return (
-      <div className="h-96 flex items-center justify-center text-muted-foreground animate-pulse">
-        Loading dashboard…
+      <div className="space-y-8 animate-in fade-in duration-500">
+        <Skeleton className="h-[250px] w-full rounded-2xl" />
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(6)].map((_, i) => (
+            <Skeleton key={i} className="h-[120px] w-full rounded-xl" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -106,9 +112,9 @@ export default function DashboardClient({ userName }: { userName: string }) {
   return (
     <div className="space-y-8">
       {/* XP / Level Hero Card */}
-      <Card className="bg-gradient-to-r from-primary/10 via-accent/10 to-background border-primary/20 relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-          <Trophy className="w-48 h-48 text-primary" />
+      <Card className="bg-gradient-to-br from-primary/15 via-accent/5 to-background border-primary/20 relative overflow-hidden rounded-2xl shadow-sm">
+        <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none transform translate-x-4 -translate-y-4">
+          <Trophy className="w-64 h-64 text-primary" />
         </div>
         <CardHeader>
           <CardTitle className="text-3xl font-bold flex items-center gap-3">
@@ -131,7 +137,7 @@ export default function DashboardClient({ userName }: { userName: string }) {
             <Progress value={stats.profileCompletion} className="h-3 bg-primary/10 transition-all duration-1000 ease-in-out" />
             {stats.profileCompletion < 100 && (
               <Link href="/profile" className="inline-block mt-4">
-                <Button size="sm">Complete Profile (+100 XP)</Button>
+                <Button size="sm" className="transition-transform hover:scale-105">Complete Profile (+100 XP)</Button>
               </Link>
             )}
           </div>
@@ -152,9 +158,9 @@ export default function DashboardClient({ userName }: { userName: string }) {
                 <p className="text-xs text-muted-foreground">Best: {stats.longestStreak} days</p>
               )}
             </div>
-            <Link href="/leaderboard">
-              <Button variant="outline" size="sm">
-                <Medal className="w-4 h-4 mr-1" /> Leaderboard
+            <Link href="/leaderboard" className="mt-2 sm:mt-0">
+              <Button variant="outline" size="sm" className="transition-transform hover:scale-105">
+                <Medal className="w-4 h-4 mr-2" /> Leaderboard
               </Button>
             </Link>
           </div>
@@ -162,16 +168,16 @@ export default function DashboardClient({ userName }: { userName: string }) {
       </Card>
 
       {/* Metric Cards Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {metricCards.map(({ label, value, sub, icon: Icon, href, color }) => (
           <Link key={label} href={href}>
-            <Card className="hover:-translate-y-1 hover:shadow-md hover:border-primary/40 transition-all duration-300 cursor-pointer h-full">
+            <Card className="hover:-translate-y-1 hover:shadow-lg hover:border-primary/40 transition-all duration-300 cursor-pointer h-full flex flex-col rounded-xl">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{label}</CardTitle>
-                <Icon className={`h-5 w-5 ${color}`} />
+                <Icon className={`h-5 w-5 ${color} opacity-80`} />
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{value}</div>
+              <CardContent className="flex-1 flex flex-col justify-end">
+                <div className="text-2xl font-bold">{value}</div>
                 <p className="text-xs text-muted-foreground mt-1">{sub}</p>
               </CardContent>
             </Card>

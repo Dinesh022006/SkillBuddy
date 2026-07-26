@@ -125,7 +125,7 @@ export default function ConnectionsPage() {
   );
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl space-y-6">
+    <div className="w-full space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Connections</h1>
         <p className="text-muted-foreground mt-1">
@@ -151,25 +151,25 @@ export default function ConnectionsPage() {
 
         <TabsContent value="connected" className="mt-4">
           {accepted.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-4">
-                <Users className="w-12 h-12 opacity-20" />
-                <p className="font-medium">No collaborators found</p>
-                <p className="text-muted-foreground max-w-md">
-                  We couldn&apos;t find anyone matching your search criteria. Try adjusting your filters, searching for different skills, or check back later!
-                </p>
-                <Link href="/discover">
-                  <Button>Discover People</Button>
-                </Link>
-              </CardContent>
-            </Card>
+            <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in duration-500">
+              <div className="bg-primary/5 p-6 rounded-full mb-6 relative">
+                <Users className="h-12 w-12 text-primary/40" />
+              </div>
+              <h3 className="text-2xl font-bold tracking-tight mb-2">No connections yet</h3>
+              <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                You haven&apos;t connected with anyone yet. Find people with complementary skills and start collaborating!
+              </p>
+              <Link href="/discover">
+                <Button className="transition-transform hover:scale-105">Discover People</Button>
+              </Link>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {accepted.map((c) => {
                 const peer = getPeer(c);
                 return (
-                  <Link key={c.id} href={`/profile/${peer.id}`}>
-                    <Card className="hover:border-primary/50 transition-colors cursor-pointer">
+                  <Link key={c.id} href={`/profile/${peer.id}`} className="block h-full">
+                    <Card className="hover:-translate-y-1 hover:shadow-lg hover:border-primary/40 transition-all duration-300 cursor-pointer h-full rounded-xl">
                       <CardContent className="flex items-center gap-4 p-4">
                         <Avatar className="w-12 h-12">
                           <AvatarImage src={peer.avatarUrl || ""} />
@@ -197,20 +197,22 @@ export default function ConnectionsPage() {
 
         <TabsContent value="incoming" className="mt-4">
           {incoming.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
-                <Clock className="w-12 h-12 opacity-20" />
-                <p className="font-medium">No notifications yet</p>
-                <p className="text-sm">You&apos;ll see connection requests, team invites, and AI matches here.</p>
-              </CardContent>
-            </Card>
+            <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in duration-500">
+              <div className="bg-primary/5 p-6 rounded-full mb-6 relative">
+                <Clock className="h-12 w-12 text-primary/40" />
+              </div>
+              <h3 className="text-2xl font-bold tracking-tight mb-2">No pending requests</h3>
+              <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                You&apos;re all caught up! Connection requests and team invites will appear here when you receive them.
+              </p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {incoming.map((c) => {
                 const peer = c.requester;
                 const isResponding = respondingId === peer.id;
                 return (
-                  <Card key={c.id}>
+                  <Card key={c.id} className="rounded-xl hover:border-primary/20 transition-colors">
                     <CardContent className="flex items-center gap-4 p-4">
                       <Avatar className="w-12 h-12">
                         <AvatarImage src={peer.avatarUrl || ""} />
@@ -253,24 +255,24 @@ export default function ConnectionsPage() {
 
         <TabsContent value="sent" className="mt-4">
           {outgoing.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-2">
-                <Loader2 className="w-12 h-12 opacity-20" />
-                <p className="font-medium">No pending sent requests</p>
-                <p className="text-sm text-center text-muted-foreground max-w-sm mt-1 mb-2">
-                  You haven&apos;t sent any connection requests recently. Head over to Discover to find collaborators!
-                </p>
-                <Link href="/discover">
-                  <Button variant="outline">Find Collaborators</Button>
-                </Link>
-              </CardContent>
-            </Card>
+            <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in duration-500">
+              <div className="bg-primary/5 p-6 rounded-full mb-6 relative">
+                <UserCheck className="h-12 w-12 text-primary/40" />
+              </div>
+              <h3 className="text-2xl font-bold tracking-tight mb-2">No requests sent</h3>
+              <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                You haven&apos;t sent any connection requests recently. Head over to Discover to find new collaborators!
+              </p>
+              <Link href="/discover">
+                <Button variant="outline" className="transition-transform hover:scale-105">Find Collaborators</Button>
+              </Link>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {outgoing.map((c) => {
                 const peer = c.receiver;
                 return (
-                  <Card key={c.id}>
+                  <Card key={c.id} className="rounded-xl hover:border-primary/20 transition-colors">
                     <CardContent className="flex items-center gap-4 p-4">
                       <Avatar className="w-12 h-12">
                         <AvatarImage src={peer.avatarUrl || ""} />

@@ -23,7 +23,7 @@ export default async function CommunitiesPage() {
   });
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4">
+    <div className="w-full">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Communities</h1>
@@ -34,13 +34,19 @@ export default async function CommunitiesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {communities.length === 0 ? (
-          <div className="col-span-full py-12 text-center text-muted-foreground">
-            No communities found. Be the first to create one!
+          <div className="col-span-full flex flex-col items-center justify-center py-20 px-4 text-center animate-in fade-in duration-500">
+            <div className="bg-primary/5 p-6 rounded-full mb-6 relative">
+              <Users className="h-12 w-12 text-primary/40" />
+            </div>
+            <h3 className="text-2xl font-bold tracking-tight mb-2">No communities yet</h3>
+            <p className="text-muted-foreground max-w-md mx-auto mb-6">
+              There are no communities available right now. Be the first to start a new community and gather like-minded peers!
+            </p>
           </div>
         ) : (
           communities.map(community => (
-            <Link key={community.id} href={`/communities/${community.id}`} className="block">
-              <div className="border rounded-lg p-6 hover:border-primary/50 hover:-translate-y-1 hover:shadow-md transition-all duration-300 bg-card h-full flex flex-col">
+            <Link key={community.id} href={`/communities/${community.id}`} className="block h-full">
+              <div className="border rounded-xl p-6 hover:border-primary/40 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 bg-card h-full flex flex-col">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
                     <Users className="h-5 w-5 text-primary" />

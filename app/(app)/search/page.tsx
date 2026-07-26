@@ -86,7 +86,7 @@ export default function GlobalSearchPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-5xl">
+    <div className="w-full">
       <div className="mb-8 text-center space-y-4">
         <h1 className="text-4xl font-bold tracking-tight">Global Search</h1>
         <p className="text-muted-foreground">Search across users, communities, teams, and posts.</p>
@@ -116,7 +116,7 @@ export default function GlobalSearchPage() {
           {results.users?.length > 0 && (
             <section>
               <h2 className="text-2xl font-bold mb-4 flex items-center border-b pb-2"><Users className="mr-2" /> Users</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                 {results.users.map((user) => (
                   <Link key={user.id} href={`/profile/${user.id}`}>
                       <Card className="hover:-translate-y-1 hover:shadow-md hover:border-primary/40 transition-all duration-300 cursor-pointer h-full flex flex-col">
@@ -166,13 +166,13 @@ export default function GlobalSearchPage() {
           {results.communities?.length > 0 && (
             <section>
               <h2 className="text-2xl font-bold mb-4 flex items-center border-b pb-2"><Network className="mr-2" /> Communities</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                 {results.communities.map((comm) => (
-                  <Link key={comm.id} href={`/communities/${comm.id}`}>
-                    <Card className="hover:border-primary transition-colors cursor-pointer h-full">
-                      <CardContent className="p-4">
+                  <Link key={comm.id} href={`/communities/${comm.id}`} className="block h-full">
+                    <Card className="hover:-translate-y-1 hover:shadow-lg hover:border-primary/40 transition-all duration-300 cursor-pointer h-full rounded-xl">
+                      <CardContent className="p-4 flex flex-col h-full">
                         <div className="font-bold text-lg">{comm.name}</div>
-                        <div className="text-sm text-muted-foreground line-clamp-2 mt-1">{comm.description}</div>
+                        <div className="text-sm text-muted-foreground line-clamp-2 mt-1 flex-1">{comm.description}</div>
                       </CardContent>
                     </Card>
                   </Link>
@@ -185,13 +185,13 @@ export default function GlobalSearchPage() {
           {results.teams?.length > 0 && (
             <section>
               <h2 className="text-2xl font-bold mb-4 flex items-center border-b pb-2"><Users2 className="mr-2" /> Teams</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                 {results.teams.map((team) => (
-                  <Link key={team.id} href={`/teams/${team.id}`}>
-                    <Card className="hover:border-primary transition-colors cursor-pointer h-full">
-                      <CardContent className="p-4">
+                  <Link key={team.id} href={`/teams/${team.id}`} className="block h-full">
+                    <Card className="hover:-translate-y-1 hover:shadow-lg hover:border-primary/40 transition-all duration-300 cursor-pointer h-full rounded-xl">
+                      <CardContent className="p-4 flex flex-col h-full">
                         <div className="font-bold text-lg">{team.name}</div>
-                        <div className="text-sm text-muted-foreground line-clamp-2 mt-1">{team.description}</div>
+                        <div className="text-sm text-muted-foreground line-clamp-2 mt-1 flex-1">{team.description}</div>
                       </CardContent>
                     </Card>
                   </Link>
@@ -225,8 +225,17 @@ export default function GlobalSearchPage() {
           )}
 
           {Object.values(results).every((arr) => Array.isArray(arr) && arr.length === 0) && (
-            <div className="text-center py-20 text-muted-foreground">
-              No results found for &quot;{query}&quot;
+            <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in duration-500">
+              <div className="bg-primary/5 p-6 rounded-full mb-6 relative">
+                <Search className="h-12 w-12 text-primary/40" />
+              </div>
+              <h3 className="text-2xl font-bold tracking-tight mb-2">No results found</h3>
+              <p className="text-muted-foreground max-w-md mx-auto mb-6">
+                We couldn&apos;t find anything matching &quot;{query}&quot;. Try adjusting your search terms or exploring the Discover page.
+              </p>
+              <Button variant="outline" onClick={() => {setSearchTerm(""); router.push("/search")}}>
+                Clear Search
+              </Button>
             </div>
           )}
         </div>
