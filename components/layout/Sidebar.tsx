@@ -37,11 +37,11 @@ const sidebarLinks = [
   { name: 'Settings',     href: '/settings',      icon: Settings },
 ]
 
-function SidebarContent({ onClick }: { onClick?: () => void }) {
+function SidebarContent({ onClick, className }: { onClick?: () => void, className?: string }) {
   const pathname = usePathname()
 
   return (
-    <div className="flex h-full w-full flex-col bg-sidebar text-sidebar-foreground">
+    <div className={cn("flex flex-col bg-sidebar text-sidebar-foreground overflow-hidden", className)}>
       {/* Logo */}
       <div className="flex h-14 items-center border-b px-4 shrink-0">
         <Link href="/dashboard" className="flex items-center gap-2 font-bold text-xl text-primary" onClick={onClick}>
@@ -51,7 +51,7 @@ function SidebarContent({ onClick }: { onClick?: () => void }) {
       </div>
 
       {/* Nav */}
-      <div className="flex-1 overflow-y-auto py-4 scrollbar-thin">
+      <div className="flex-1 overflow-y-auto py-4 scrollbar-thin min-h-0">
         <nav className="grid gap-1 px-2">
           {sidebarLinks.map((link) => {
             const Icon = link.icon
@@ -93,9 +93,7 @@ function SidebarContent({ onClick }: { onClick?: () => void }) {
 
 export function Sidebar() {
   return (
-    <div className="hidden md:flex h-full w-64 flex-col border-r bg-sidebar text-sidebar-foreground">
-      <SidebarContent />
-    </div>
+    <SidebarContent className="desktop-sidebar h-full w-64 border-r" />
   )
 }
 
@@ -111,10 +109,10 @@ export function MobileNav() {
         <Menu className="h-6 w-6" />
         <span className="sr-only">Toggle Menu</span>
       </SheetTrigger>
-      <SheetContent side="left" className="w-72 p-0 border-r-0">
+      <SheetContent side="left" className="w-72 p-0 border-r-0 flex flex-col">
         <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
         <SheetDescription className="sr-only">Navigate through the app</SheetDescription>
-        <SidebarContent onClick={() => setOpen(false)} />
+        <SidebarContent onClick={() => setOpen(false)} className="h-full flex-1" />
       </SheetContent>
     </Sheet>
   )

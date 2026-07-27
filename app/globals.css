@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@source "../components";
+@source "../lib";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -126,5 +128,23 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* Bypass Tailwind JIT scanner bugs */
+.desktop-sidebar {
+  display: none;
+}
+.mobile-top-nav {
+  display: flex;
+}
+
+@media (min-width: 768px) {
+  .desktop-sidebar {
+    display: flex;
+    flex-direction: column;
+  }
+  .mobile-top-nav {
+    display: none !important;
   }
 }

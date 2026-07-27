@@ -12,23 +12,29 @@ export const metadata: Metadata = {
   title: "Community Details - SkillBuddy AI",
 };
 
-export default async function CommunityDetailsPage({ params }: { params: { communityId: string } }) {
-  const clerkUser = await currentUser();
-  const dbUser = clerkUser ? await prisma.user.findUnique({ where: { clerkId: clerkUser.id } }) : null;
+export default async function CommunityDetailsPage({ params }: { params: Promise<{ communityId: string }> }) {
+  const { communityId } = await params;
+  if (!communityId) notFound();
 
-  const community = await prisma.community.findUnique({
-    where: { id: params.communityId },
-    include: {
-      members: {
-        include: { user: true }
-      },
-      chatRoom: true
-    }
-  });
+  const [clerkUser, community] = await Promise.all([
+    currentUser(),
+    prisma.community.findUnique({
+      where: { id: communityId },
+      include: {
+        members: { include: { user: true } },
+        chatRoom: true
+      }
+    })
+  ]);
 
   if (!community) notFound();
 
+  const dbUser = clerkUser ? await prisma.user.findUnique({ where: { clerkId: clerkUser.id } }) : null;
   const isMember = dbUser ? community.members.some((m) => m.userId === dbUser.id) : false;
+
+  if (community.visibility === "PRIVATE" && !isMember) {
+    notFound();
+  }
 
   return (
     <div className="w-full py-8 px-4 flex flex-col md:flex-row gap-8">

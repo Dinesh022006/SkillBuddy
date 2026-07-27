@@ -11,7 +11,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Mobile Top Nav (hidden on md and larger) */}
-        <header className="flex h-14 items-center justify-between border-b bg-background px-4 md:hidden shrink-0">
+        <header className="mobile-top-nav h-14 items-center justify-between border-b bg-background px-4 shrink-0">
           <div className="flex items-center gap-3">
             <MobileNav />
             <Link href="/dashboard" className="flex items-center gap-2 font-bold text-lg text-primary">

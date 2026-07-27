@@ -20,6 +20,21 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SkillBuddy AI | Student Collaboration Network",
   description: "Connecting the Right Students at the Right Time for the Right Opportunity.",
+  keywords: ["students", "collaboration", "hackathons", "ai matching", "study groups", "networking"],
+  authors: [{ name: "SkillBuddy Team" }],
+  openGraph: {
+    title: "SkillBuddy AI | Student Collaboration Network",
+    description: "Connecting the Right Students at the Right Time for the Right Opportunity.",
+    url: "https://skillbuddy.ai",
+    siteName: "SkillBuddy AI",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SkillBuddy AI | Student Collaboration Network",
+    description: "Connecting the Right Students at the Right Time for the Right Opportunity.",
+  },
 };
 
 export default function RootLayout({

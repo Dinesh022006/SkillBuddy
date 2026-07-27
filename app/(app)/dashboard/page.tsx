@@ -19,3 +19,6 @@ export default async function DashboardPage() {
     </div>
   );
 }
+
+// Force Tailwind to generate these classes (workaround for @source caching)
+// hidden md:flex h-full w-64 border-r md:hidden flex-1 flex-col overflow-y-auto scrollbar-thin

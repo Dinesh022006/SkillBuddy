@@ -14,25 +14,30 @@ export const metadata: Metadata = {
   title: "Profile - SkillBuddy AI",
 };
 
-export default async function PublicProfilePage({ params }: { params: { userId: string } }) {
-  const clerkUser = await currentUser();
-  const currentDbUser = clerkUser ? await prisma.user.findUnique({ where: { clerkId: clerkUser.id } }) : null;
+export default async function PublicProfilePage({ params }: { params: Promise<{ userId: string }> }) {
+  const { userId } = await params;
+  if (!userId) notFound();
 
-  const targetUser = await prisma.user.findUnique({
-    where: { id: params.userId },
-    include: {
-      profile: {
-        include: {
-          skills: { include: { skill: true } },
-          learningGoals: { include: { skill: true } },
-          learningStreak: true,
-          userBadges: { include: { badge: true } },
+  const [clerkUser, targetUser] = await Promise.all([
+    currentUser(),
+    prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        profile: {
+          include: {
+            skills: { include: { skill: true } },
+            learningGoals: { include: { skill: true } },
+            learningStreak: true,
+            userBadges: { include: { badge: true } },
+          }
         }
       }
-    }
-  });
+    })
+  ]);
 
   if (!targetUser) notFound();
+
+  const currentDbUser = clerkUser ? await prisma.user.findUnique({ where: { clerkId: clerkUser.id } }) : null;
 
   const isCurrentUser = currentDbUser?.id === targetUser.id;
 

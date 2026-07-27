@@ -11,22 +11,24 @@ export const metadata: Metadata = {
   title: "Team Details - SkillBuddy AI",
 };
 
-export default async function TeamDetailsPage({ params }: { params: { teamId: string } }) {
-  const clerkUser = await currentUser();
-  const dbUser = clerkUser ? await prisma.user.findUnique({ where: { clerkId: clerkUser.id } }) : null;
+export default async function TeamDetailsPage({ params }: { params: Promise<{ teamId: string }> }) {
+  const { teamId } = await params;
+  if (!teamId) notFound();
 
-  const team = await prisma.team.findUnique({
-    where: { id: params.teamId },
-    include: {
-      members: {
-        include: { user: true }
-      },
-      chatRoom: true
-    }
-  });
+  const [clerkUser, team] = await Promise.all([
+    currentUser(),
+    prisma.team.findUnique({
+      where: { id: teamId },
+      include: {
+        members: { include: { user: true } },
+        chatRoom: true
+      }
+    })
+  ]);
 
   if (!team) notFound();
 
+  const dbUser = clerkUser ? await prisma.user.findUnique({ where: { clerkId: clerkUser.id } }) : null;
   const isMember = dbUser ? team.members.some(m => m.userId === dbUser.id) : false;
 
   return (
