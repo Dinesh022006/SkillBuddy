@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/UserAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -171,12 +171,12 @@ export default function ConnectionsPage() {
                   <Link key={c.id} href={`/profile/${peer.id}`} className="block h-full">
                     <Card className="hover:-translate-y-1 hover:shadow-lg hover:border-primary/40 transition-all duration-300 cursor-pointer h-full rounded-xl">
                       <CardContent className="flex items-center gap-4 p-4">
-                        <Avatar className="w-12 h-12">
-                          <AvatarImage src={peer.avatarUrl || ""} />
-                          <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                            {peer.name?.charAt(0)?.toUpperCase() ?? "U"}
-                          </AvatarFallback>
-                        </Avatar>
+                        <UserAvatar 
+                          userId={peer.id} 
+                          name={peer.name} 
+                          imageUrl={peer.avatarUrl} 
+                          size="lg" 
+                        />
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold truncate">{peer.name || "Anonymous"}</p>
                           {peer.profile && (
@@ -214,12 +214,12 @@ export default function ConnectionsPage() {
                 return (
                   <Card key={c.id} className="rounded-xl hover:border-primary/20 transition-colors">
                     <CardContent className="flex items-center gap-4 p-4">
-                      <Avatar className="w-12 h-12">
-                        <AvatarImage src={peer.avatarUrl || ""} />
-                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                          {peer.name?.charAt(0)?.toUpperCase() ?? "U"}
-                        </AvatarFallback>
-                      </Avatar>
+                      <UserAvatar 
+                        userId={peer.id} 
+                        name={peer.name} 
+                        imageUrl={peer.avatarUrl} 
+                        size="lg" 
+                      />
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold truncate">{peer.name || "Anonymous"}</p>
                         {peer.profile && (
@@ -274,12 +274,12 @@ export default function ConnectionsPage() {
                 return (
                   <Card key={c.id} className="rounded-xl hover:border-primary/20 transition-colors">
                     <CardContent className="flex items-center gap-4 p-4">
-                      <Avatar className="w-12 h-12">
-                        <AvatarImage src={peer.avatarUrl || ""} />
-                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                          {peer.name?.charAt(0)?.toUpperCase() ?? "U"}
-                        </AvatarFallback>
-                      </Avatar>
+                      <UserAvatar 
+                        userId={peer.id} 
+                        name={peer.name} 
+                        imageUrl={peer.avatarUrl} 
+                        size="lg" 
+                      />
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold truncate">{peer.name || "Anonymous"}</p>
                         {peer.profile && (

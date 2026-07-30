@@ -16,6 +16,7 @@ interface Notification {
   read: boolean;
   link: string | null;
   createdAt: string;
+  senderId?: string;
 }
 
 const TYPE_ICON: Record<string, React.ElementType> = {
@@ -73,6 +74,26 @@ export default function NotificationsPage() {
       toast.add({ title: "Failed to update notifications", type: "error" });
     } finally {
       setMarking(false);
+    }
+  };
+
+  const handleRespond = async (requesterId: string, status: "ACCEPTED" | "REJECTED") => {
+    try {
+      const res = await fetch("/api/connections/respond", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requesterId, status })
+      });
+      if (res.ok) {
+        toast.add({ title: `Connection request ${status.toLowerCase()}`, type: "success" });
+        // Optimistically remove the notification or update it
+        // We can just refetch or mark as handled
+        setNotifications((prev) => prev.filter(n => !(n.type === "CONNECTION_REQUEST" && n.senderId === requesterId)));
+      } else {
+        toast.add({ title: "Failed to process request", type: "error" });
+      }
+    } catch {
+      toast.add({ title: "An error occurred", type: "error" });
     }
   };
 
@@ -143,8 +164,15 @@ export default function NotificationsPage() {
                     </div>
                     <p className="text-sm text-muted-foreground mt-0.5">{notification.message}</p>
                     <p className="text-xs text-muted-foreground/60 mt-1">{timeAgo(notification.createdAt)}</p>
+                    
+                    {notification.type === "CONNECTION_REQUEST" && notification.senderId && (
+                      <div className="mt-3 flex gap-2">
+                        <Button size="sm" onClick={() => handleRespond(notification.senderId!, "ACCEPTED")}>Accept</Button>
+                        <Button size="sm" variant="outline" onClick={() => handleRespond(notification.senderId!, "REJECTED")}>Decline</Button>
+                      </div>
+                    )}
                   </div>
-                  {notification.link && (
+                  {notification.link && notification.type !== "CONNECTION_REQUEST" && (
                     <a href={notification.link} className="shrink-0">
                       <Button variant="outline" size="sm">View</Button>
                     </a>

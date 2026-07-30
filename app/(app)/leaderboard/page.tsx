@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/UserAvatar";
 import { Trophy, Flame } from "lucide-react";
 import Link from "next/link";
 
@@ -70,12 +70,12 @@ export default async function LeaderboardPage() {
                     <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1 pr-2">
                       <div className="w-8 flex justify-center shrink-0">{rankIcon}</div>
                       <Link href={`/profile/${profile.userId}`} className="shrink-0 hover:opacity-80 transition-opacity">
-                        <Avatar className="h-10 w-10">
-                          <AvatarImage src={avatar || ""} alt={name} />
-                          <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                            {initial}
-                          </AvatarFallback>
-                        </Avatar>
+                        <UserAvatar 
+                          userId={profile.userId} 
+                          name={name} 
+                          imageUrl={avatar} 
+                          size="md" 
+                        />
                       </Link>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">

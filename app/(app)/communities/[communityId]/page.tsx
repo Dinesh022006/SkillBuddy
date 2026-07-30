@@ -5,7 +5,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Users, MessagesSquare } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/UserAvatar";
 import CommunityFeed from "./CommunityFeed";
 
 export const metadata: Metadata = {
@@ -100,12 +100,12 @@ export default async function CommunityDetailsPage({ params }: { params: Promise
           {community.members.slice(0, 10).map((member) => (
             <Link key={member.id} href={`/profile/${member.userId}`} className="block">
               <div className="flex items-center gap-3 p-3 border rounded-lg bg-card hover:border-primary/50 transition-colors">
-                <Avatar className="w-10 h-10 shrink-0">
-                  <AvatarImage src={member.user.avatarUrl || ""} />
-                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                    {member.user.name?.charAt(0)?.toUpperCase() ?? "U"}
-                  </AvatarFallback>
-                </Avatar>
+                <UserAvatar 
+                  userId={member.userId} 
+                  name={member.user.name} 
+                  imageUrl={member.user.avatarUrl} 
+                  size="md" 
+                />
                 <div className="overflow-hidden">
                   <p className="font-medium text-sm truncate">{member.user.name || "Anonymous User"}</p>
                   <p className="text-xs text-muted-foreground">{member.role}</p>

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-
+import { recommendationService } from "@/lib/recommendations";
 
 export async function GET(req: Request) {
   try {
@@ -15,59 +15,42 @@ export async function GET(req: Request) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const search = searchParams.get("search") || "";
+    const section = searchParams.get("section") || "search";
     
-    // Calculate pagination skip
     const skip = (page - 1) * limit;
 
-    // Base query: find users other than current user
-    const whereClause: NonNullable<Parameters<typeof prisma.user.findMany>[0]>["where"] = {
-      id: { not: dbUser.id },
-      deletedAt: null
-    };
+    let users = [];
 
+    // Search explicitly overrides sections if present
     if (search) {
-      whereClause.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { profile: { college: { contains: search, mode: 'insensitive' } } },
-        { profile: { branch: { contains: search, mode: 'insensitive' } } },
-        { profile: { skills: { some: { skill: { name: { contains: search, mode: 'insensitive' } } } } } },
-      ];
+      users = await recommendationService.searchUsers(dbUser.id, search, limit, skip);
+    } else {
+      switch (section) {
+        case "ai_recommended":
+          users = await recommendationService.getAIRecommendations(dbUser.id, limit, skip);
+          break;
+        case "similar_skills":
+          users = await recommendationService.getSkillRecommendations(dbUser.id, limit, skip);
+          break;
+        case "similar_goals":
+          users = await recommendationService.getLearningRecommendations(dbUser.id, limit, skip);
+          break;
+        case "shared_communities":
+          users = await recommendationService.getCommunityRecommendations(dbUser.id, limit, skip);
+          break;
+        case "top_contributors":
+          users = await recommendationService.getTopContributors(dbUser.id, limit, skip);
+          break;
+        default:
+          return new NextResponse("Invalid section", { status: 400 });
+      }
     }
-
-    const users = await prisma.user.findMany({
-      where: whereClause,
-      include: {
-        profile: {
-          include: {
-            skills: { include: { skill: true } },
-            learningGoals: { include: { skill: true } }
-          }
-        },
-        recommendationsFor: {
-          where: { sourceUserId: dbUser.id, type: "AI_MATCH" },
-          include: { aiInsight: true }
-        },
-        connectionsReceived: {
-          where: { requesterId: dbUser.id }
-        },
-        connectionsInitiated: {
-          where: { receiverId: dbUser.id }
-        }
-      },
-      skip,
-      take: limit,
-      orderBy: { createdAt: 'desc' }
-    });
-
-    const total = await prisma.user.count({ where: whereClause });
 
     return NextResponse.json({
       data: users,
       meta: {
-        total,
         page,
         limit,
-        totalPages: Math.ceil(total / limit)
       }
     });
 

@@ -21,7 +21,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/UserAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { UploadButton } from "@/utils/uploadthing";
@@ -346,12 +346,13 @@ export function ProfileClient({ initialData }: { initialData: InitialProfileData
           {/* Avatar & XP */}
           <Card>
             <CardContent className="pt-6 flex flex-col items-center text-center space-y-4">
-              <Avatar className="h-28 w-28">
-                <AvatarImage src={initialData?.avatarUrl || ""} alt="Avatar" />
-                <AvatarFallback className="text-3xl font-bold bg-primary/10 text-primary">
-                  {initialData?.firstName?.[0]?.toUpperCase() || "U"}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar 
+                userId={initialData?.id} 
+                name={initialData?.name} 
+                imageUrl={initialData?.avatarUrl} 
+                size="3xl" 
+                className="h-28 w-28"
+              />
               <div>
                 <h3 className="font-semibold text-lg">{initialData?.name || "Your Name"}</h3>
                 <p className="text-sm text-muted-foreground">

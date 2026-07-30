@@ -19,19 +19,55 @@ export async function PATCH(req: Request) {
     const body = await req.json();
     const { requesterId, status } = respondSchema.parse(body);
 
-    const connection = await prisma.connection.update({
-      where: {
-        requesterId_receiverId: {
-          requesterId,
-          receiverId: dbUser.id
+    const result = await prisma.$transaction(async (tx) => {
+      const connection = await tx.connection.update({
+        where: {
+          requesterId_receiverId: {
+            requesterId,
+            receiverId: dbUser.id
+          }
+        },
+        data: {
+          status
         }
-      },
-      data: {
-        status
+      });
+
+      // Remove the original pending connection request notification
+      await tx.notification.deleteMany({
+        where: {
+          userId: dbUser.id,
+          senderId: requesterId,
+          type: "CONNECTION_REQUEST"
+        }
+      });
+
+      if (status === "ACCEPTED") {
+        await tx.notification.create({
+          data: {
+            userId: requesterId,
+            senderId: dbUser.id,
+            type: "CONNECTION_ACCEPTED",
+            title: "Connection Request Accepted",
+            message: `${dbUser.name || "A user"} accepted your connection request.`,
+            link: "/connections"
+          }
+        });
+      } else if (status === "REJECTED") {
+        await tx.notification.create({
+          data: {
+            userId: requesterId,
+            senderId: dbUser.id,
+            type: "SYSTEM",
+            title: "Connection Request Declined",
+            message: `${dbUser.name || "A user"} declined your connection request.`,
+          }
+        });
       }
+
+      return connection;
     });
 
-    return NextResponse.json(connection);
+    return NextResponse.json(result);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new NextResponse("Invalid request data", { status: 422 });

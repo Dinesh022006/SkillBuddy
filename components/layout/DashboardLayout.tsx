@@ -2,6 +2,7 @@ import { Sidebar, MobileNav } from './Sidebar'
 import { UserButton } from '@clerk/nextjs'
 import { Compass } from 'lucide-react'
 import Link from 'next/link'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -19,7 +20,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <span>SkillBuddy AI</span>
             </Link>
           </div>
-          <UserButton />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserButton />
+          </div>
         </header>
 
         {/* Main Content Area */}

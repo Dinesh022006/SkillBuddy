@@ -4,13 +4,14 @@ import { useEffect, useState, useCallback } from "react";
 import { Loader2, MessageSquare, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/UserAvatar";
 
 type Post = {
   id: string;
   content: string;
   createdAt: string;
   author: {
+    id: string;
     name?: string | null;
     avatarUrl?: string | null;
   };
@@ -103,12 +104,12 @@ export default function CommunityFeed({ communityId, isMember }: { communityId: 
           posts.map(post => (
             <div key={post.id} className="bg-card border rounded-lg p-6">
               <div className="flex items-center gap-3 mb-4">
-                <Avatar className="w-10 h-10">
-                  <AvatarImage src={post.author.avatarUrl || ""} />
-                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                    {post.author.name?.charAt(0)?.toUpperCase() ?? "U"}
-                  </AvatarFallback>
-                </Avatar>
+                <UserAvatar 
+                  userId={post.author.id} 
+                  name={post.author.name} 
+                  imageUrl={post.author.avatarUrl} 
+                  size="md" 
+                />
                 <div>
                   <p className="font-semibold text-sm">{post.author.name}</p>
                   <p className="text-xs text-muted-foreground">{new Date(post.createdAt).toLocaleDateString()}</p>

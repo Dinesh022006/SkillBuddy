@@ -14,9 +14,9 @@ import {
   MessageSquare,
   UserCheck,
   Trophy,
-  Search,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
@@ -31,7 +31,6 @@ const sidebarLinks = [
   { name: 'Communities',  href: '/communities',   icon: Users },
   { name: 'Chat',         href: '/chat',          icon: MessageSquare },
   { name: 'Leaderboard',  href: '/leaderboard',   icon: Trophy },
-  { name: 'Search',       href: '/search',        icon: Search },
   { name: 'Notifications',href: '/notifications', icon: Bell },
   { name: 'Profile',      href: '/profile',       icon: User },
   { name: 'Settings',     href: '/settings',      icon: Settings },
@@ -85,7 +84,10 @@ function SidebarContent({ onClick, className }: { onClick?: () => void, classNam
         <p className="text-xs text-muted-foreground">
           SkillBuddy AI &copy; {new Date().getFullYear()}
         </p>
-        <UserButton />
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <UserButton />
+        </div>
       </div>
     </div>
   )

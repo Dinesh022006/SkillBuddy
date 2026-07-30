@@ -5,7 +5,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Users, MessagesSquare } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/UserAvatar";
 
 export const metadata: Metadata = {
   title: "Team Details - SkillBuddy AI",
@@ -92,12 +92,12 @@ export default async function TeamDetailsPage({ params }: { params: Promise<{ te
           {team.members.map(member => (
             <Link key={member.id} href={`/profile/${member.userId}`} className="block">
               <div className="flex items-center gap-4 p-4 border rounded-lg bg-card hover:border-primary/50 transition-colors">
-                <Avatar className="w-12 h-12 shrink-0">
-                  <AvatarImage src={member.user.avatarUrl || ""} />
-                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                    {member.user.name?.charAt(0)?.toUpperCase() ?? "U"}
-                  </AvatarFallback>
-                </Avatar>
+                <UserAvatar 
+                  userId={member.userId} 
+                  name={member.user.name} 
+                  imageUrl={member.user.avatarUrl} 
+                  size="lg" 
+                />
                 <div className="min-w-0">
                   <p className="font-medium truncate">{member.user.name || "Anonymous User"}</p>
                   <p className="text-sm text-muted-foreground truncate">{member.role}</p>

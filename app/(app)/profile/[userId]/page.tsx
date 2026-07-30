@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/UserAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Flame, Code, Briefcase, MapPin, Check, BookOpen } from "lucide-react";
@@ -79,12 +79,13 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
         <div className="h-32 bg-gradient-to-r from-primary/20 to-primary/5" />
         <CardContent className="relative pt-0 sm:pt-0">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 sm:-mt-12 -mt-16 mb-4">
-            <Avatar className="h-32 w-32 border-4 border-background shadow-sm">
-              <AvatarImage src={targetUser.avatarUrl || ""} alt={name} />
-              <AvatarFallback className="text-4xl font-bold bg-primary/10 text-primary">
-                {initial}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar 
+              userId={targetUser.id} 
+              name={name} 
+              imageUrl={targetUser.avatarUrl} 
+              size="3xl" 
+              className="border-4 border-background"
+            />
             <div className="flex-1 text-center sm:text-left min-w-0">
               <h1 className="text-3xl font-bold tracking-tight truncate flex items-center justify-center sm:justify-start gap-2">
                 {name}

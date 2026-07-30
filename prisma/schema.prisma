@@ -44,8 +44,12 @@ model User {
   reactions Reaction[]
 
   fileAssets FileAsset[]
+  attachments Attachment[]
 
   aiLogs AILog[]
+
+  @@index([name])
+  @@index([username])
 }
 
 model Profile {
@@ -90,6 +94,8 @@ model Profile {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([college])
 }
 
 model Skill {
@@ -303,6 +309,7 @@ model Message {
   roomId        String
   senderId      String
   attachmentUrl String?
+  attachments   Attachment[]
   seenBy        String[]
 
   room   ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
@@ -310,6 +317,26 @@ model Message {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Attachment {
+  id              String   @id @default(uuid())
+  messageId       String
+  uploadedBy      String
+  fileName        String
+  originalName    String
+  mimeType        String
+  fileSize        Int
+  url             String
+  thumbnailUrl    String?
+  width           Int?
+  height          Int?
+  duration        Int?
+  storageProvider String   @default("CLOUDINARY")
+  createdAt       DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
 }
 
 model FileAsset {
