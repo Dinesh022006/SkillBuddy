@@ -43,8 +43,9 @@ SkillBuddy is an AI-powered peer learning and collaboration platform that connec
 ### AI
 - Google Gemini API
 
-### File Uploads
-- UploadThing
+### File Uploads & Storage
+- Vercel Blob (Chat Attachments)
+- UploadThing (Profile Resumes)
 
 ---
 
@@ -88,6 +89,7 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
 UPLOADTHING_TOKEN=
 GEMINI_API_KEY=
+BLOB_READ_WRITE_TOKEN=
 ```
 
 Run the development server:

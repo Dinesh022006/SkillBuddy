@@ -10,7 +10,7 @@ export interface StagedFile {
   isUploading: boolean;
   progress: number;
   error?: string;
-  uploadedData?: any; // To store Cloudinary response
+  uploadedData?: any; // To store Vercel Blob response
   abortController?: AbortController;
 }
 

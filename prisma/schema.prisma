@@ -332,7 +332,7 @@ model Attachment {
   width           Int?
   height          Int?
   duration        Int?
-  storageProvider String   @default("CLOUDINARY")
+  storageProvider String   @default("VERCEL_BLOB")
   createdAt       DateTime @default(now())
 
   message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)

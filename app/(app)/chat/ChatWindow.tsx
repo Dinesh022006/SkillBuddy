@@ -14,7 +14,7 @@ import { FileUploadButton } from "@/components/chat/FileUploadButton";
 import { AttachmentPreview, type StagedFile } from "@/components/chat/AttachmentPreview";
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import dynamic from "next/dynamic";
-import { validateFile, uploadToCloudinary } from "@/lib/utils/upload";
+import { validateFile, uploadToVercelBlob } from "@/lib/utils/upload";
 import { Smile } from "lucide-react";
 
 const ImageViewer = dynamic(() => import("@/components/chat/ImageViewer").then(mod => mod.ImageViewer), { ssr: false });
@@ -142,7 +142,7 @@ export default function ChatWindow() {
       setStagedFiles(prev => [...prev, newStagedFile]);
       
       if (!error) {
-        uploadToCloudinary(file, (progress) => {
+        uploadToVercelBlob(file, (progress) => {
           setStagedFiles(prev => prev.map(f => f.id === id ? { ...f, progress } : f));
         }, abortController.signal).then(uploadedData => {
           setStagedFiles(prev => prev.map(f => f.id === id ? { ...f, isUploading: false, progress: 100, uploadedData } : f));
@@ -176,7 +176,7 @@ export default function ChatWindow() {
         : f
     ));
 
-    uploadToCloudinary(fileToRetry.file, (progress) => {
+    uploadToVercelBlob(fileToRetry.file, (progress) => {
       setStagedFiles(prev => prev.map(f => f.id === id ? { ...f, progress } : f));
     }, abortController.signal).then(uploadedData => {
       setStagedFiles(prev => prev.map(f => f.id === id ? { ...f, isUploading: false, progress: 100, uploadedData } : f));

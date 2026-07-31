@@ -43,108 +43,41 @@ export function validateFile(file: File): string | null {
   return `File type ${type} is not supported.`;
 }
 
-export async function uploadToCloudinary(
+import { upload } from '@vercel/blob/client';
+
+export async function uploadToVercelBlob(
   file: File,
   onProgress?: UploadProgressCallback,
   signal?: AbortSignal
 ): Promise<UploadedFile> {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  if (!cloudName) throw new Error("Cloudinary cloud name is not configured.");
+  try {
+    const blob = await upload(file.name, file, {
+      access: 'public',
+      handleUploadUrl: '/api/blob/upload',
+      abortSignal: signal,
+      onUploadProgress: (progressEvent) => {
+        if (onProgress) {
+          const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+          onProgress(progress);
+        }
+      }
+    });
 
-  // Get secure signature
-  const timestamp = Math.round(new Date().getTime() / 1000);
-  const paramsToSign = {
-    timestamp,
-    folder: "chat_attachments",
-  };
+    const isImage = VALID_FILE_TYPES.image.includes(file.type);
 
-  const signRes = await fetch('/api/cloudinary/sign', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ paramsToSign }),
-  });
-
-  if (!signRes.ok) {
-    let errMsg = "Failed to get upload signature.";
-    try {
-      const errBody = await signRes.json();
-      if (errBody.error) errMsg = errBody.error;
-    } catch (e) {
-      // Ignore JSON parse error if response is not JSON
+    return {
+      url: blob.url,
+      fileName: blob.pathname, // Using pathname as the unique fileName/id
+      originalName: file.name,
+      mimeType: file.type,
+      fileSize: file.size,
+      // For Vercel Blob, we just use the original URL for image previews
+      ...(isImage && { thumbnailUrl: blob.url })
+    };
+  } catch (error) {
+    if (signal?.aborted || (error as Error).name === 'AbortError') {
+      throw new Error("Upload cancelled");
     }
-    throw new Error(errMsg);
+    throw new Error((error as Error).message || "Upload failed");
   }
-
-  const { signature, apiKey } = await signRes.json();
-
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("api_key", apiKey);
-  formData.append("timestamp", timestamp.toString());
-  formData.append("signature", signature);
-  formData.append("folder", "chat_attachments");
-  
-  // Choose endpoint type
-  const isImage = VALID_FILE_TYPES.image.includes(file.type);
-  const resourceType = isImage ? "image" : "raw";
-
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    const url = `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`;
-
-    if (signal) {
-      if (signal.aborted) {
-        return reject(new Error("Upload cancelled"));
-      }
-      signal.addEventListener("abort", () => {
-        xhr.abort();
-        reject(new Error("Upload cancelled"));
-      });
-    }
-
-    xhr.open("POST", url, true);
-
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable && onProgress) {
-        const progress = Math.round((e.loaded / e.total) * 100);
-        onProgress(progress);
-      }
-    };
-
-    xhr.onload = () => {
-      if (xhr.status === 200) {
-        const response = JSON.parse(xhr.responseText);
-        
-        const uploadedFile: UploadedFile = {
-          url: response.secure_url,
-          fileName: response.public_id,
-          originalName: file.name,
-          mimeType: file.type,
-          fileSize: file.size,
-        };
-
-        if (isImage) {
-          uploadedFile.width = response.width;
-          uploadedFile.height = response.height;
-          // Create a thumbnail url using Cloudinary transformations
-          const uploadParts = response.secure_url.split('/upload/');
-          uploadedFile.thumbnailUrl = `${uploadParts[0]}/upload/c_thumb,w_200,h_200/${uploadParts[1]}`;
-        }
-
-        resolve(uploadedFile);
-      } else {
-        let errorMsg = "Upload failed.";
-        try {
-          const error = JSON.parse(xhr.responseText);
-          errorMsg = error.error?.message || errorMsg;
-        } catch (e) {
-          errorMsg = `Upload failed with status ${xhr.status}`;
-        }
-        reject(new Error(errorMsg));
-      }
-    };
-
-    xhr.onerror = () => reject(new Error("Network error during upload."));
-    xhr.send(formData);
-  });
 }

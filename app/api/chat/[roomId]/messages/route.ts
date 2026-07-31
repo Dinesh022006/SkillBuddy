@@ -85,7 +85,7 @@ export async function POST(
             height: a.height,
             duration: a.duration,
             uploadedBy: dbUser.id,
-            storageProvider: "CLOUDINARY"
+            storageProvider: "VERCEL_BLOB"
           }))
         } : undefined
       },
