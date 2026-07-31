@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
+import EmojiPickerLib, { Theme } from "emoji-picker-react";
 import { Smile } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { buttonVariants } from "@/components/ui/button";
@@ -17,8 +16,8 @@ export function EmojiPicker({ onEmojiSelect, disabled }: EmojiPickerProps) {
   const { resolvedTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleEmojiSelect = (emoji: any) => {
-    onEmojiSelect(emoji.native);
+  const handleEmojiSelect = (emojiData: any) => {
+    onEmojiSelect(emojiData.emoji);
   };
 
   return (
@@ -35,15 +34,11 @@ export function EmojiPicker({ onEmojiSelect, disabled }: EmojiPickerProps) {
         align="start" 
         className="w-auto p-0 border-none shadow-2xl z-[100]"
       >
-        <Picker 
-          data={(data as any).default || data} 
-          onEmojiSelect={handleEmojiSelect}
-          theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
-          set="native"
-          autoFocus={true}
-          navPosition="bottom"
-          previewPosition="none"
-          skinTonePosition="none"
+        <EmojiPickerLib 
+          onEmojiClick={handleEmojiSelect}
+          theme={resolvedTheme === 'dark' ? Theme.DARK : Theme.LIGHT}
+          autoFocusSearch={true}
+          lazyLoadEmojis={true}
         />
       </PopoverContent>
     </Popover>
