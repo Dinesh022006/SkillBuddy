@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { pusherServer } from "@/lib/pusher";
 
 export async function POST(req: Request, { params }: { params: Promise<{ roomId: string }> }) {
   try {
@@ -23,6 +24,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ roomId:
         }
       }
     });
+
+    if (pusherServer) {
+      await pusherServer.trigger(`private-room-${roomId}`, 'message-read', {
+        userId: dbUser.id,
+        roomId
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

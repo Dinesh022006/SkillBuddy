@@ -8,12 +8,24 @@ import { MessagesSquare, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useChatStore } from "./store/useChatStore";
 
+import { useUser } from "@clerk/nextjs";
+
 export default function ChatAppContainer() {
-  const { activeChat, setActiveChat, fetchRooms } = useChatStore();
+  const { user } = useUser();
+  const { activeChat, setActiveChat, fetchRooms, initPusher, cleanupPusher } = useChatStore();
 
   useEffect(() => {
     fetchRooms();
   }, [fetchRooms]);
+
+  useEffect(() => {
+    if (user?.id) {
+      initPusher(user.id);
+    }
+    return () => {
+      cleanupPusher();
+    };
+  }, [user?.id, initPusher, cleanupPusher]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -21,9 +33,6 @@ export default function ChatAppContainer() {
         if (e.defaultPrevented) return;
         
         const state = useChatStore.getState();
-        
-        // If the custom profile drawer is open, let it handle Escape
-        if (state.isProfileDrawerOpen) return;
         
         // If a Radix dialog, dropdown, or popover is open, ignore
         const hasOpenOverlay = document.querySelector(

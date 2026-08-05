@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type MessageStatus = 'sending' | 'sent' | 'failed';
+export type MessageStatus = 'sending' | 'sent' | 'failed' | 'read';
 
 export type Attachment = {
   id?: string;
@@ -26,18 +26,20 @@ export type Message = {
   createdAt?: string;
   status?: MessageStatus;
   attachments?: Attachment[];
+  seenBy?: string[];
 };
 
 export type Room = {
   id: string;
   name?: string | null;
   type: string;
-  participants: { user?: { id?: string | null; name?: string | null; clerkId?: string | null; avatarUrl?: string | null; } }[];
-  messages?: { content?: string; createdAt?: string }[];
+  participants: { user?: { id?: string | null; name?: string | null; clerkId?: string | null; avatarUrl?: string | null; lastSeen?: string | null; } }[];
+  messages?: { content?: string; createdAt?: string; attachments?: Attachment[] }[];
   team?: { name: string };
   community?: { name: string };
   isNewConnection?: boolean;
   unreadCount?: number;
+  updatedAt?: string;
 };
 
 export type ActiveChat = {
@@ -56,9 +58,9 @@ interface ChatState {
   sending: boolean;
   typingUsers: Record<string, boolean>;
   onlineUsers: string[];
-  isProfileDrawerOpen: boolean;
-  selectedProfileUserId: string | null;
   profileCache: Record<string, any>;
+  pusherInitialized: boolean;
+  typingTimeouts: Record<string, NodeJS.Timeout>;
 }
 
 interface ChatActions {
@@ -77,13 +79,15 @@ interface ChatActions {
   ) => Promise<string | undefined>;
   retryMessage: (roomId: string, messageId: string) => Promise<void>;
   appendIncomingMessage: (roomId: string, message: Message) => void;
+  updateMessageRead: (roomId: string, userId: string) => void;
   markConversationRead: (roomId: string) => void;
   setTyping: (roomId: string) => void;
   clearTyping: (roomId: string) => void;
+  emitTyping: (roomId: string) => void;
   updatePresence: (userId: string, isOnline: boolean) => void;
-  openProfileDrawer: (userId: string) => void;
-  closeProfileDrawer: () => void;
   fetchUserProfile: (userId: string) => Promise<void>;
+  initPusher: (userId: string) => Promise<void>;
+  cleanupPusher: () => void;
 }
 
 export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
@@ -96,12 +100,12 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
   sending: false,
   typingUsers: {},
   onlineUsers: [],
-  isProfileDrawerOpen: false,
-  selectedProfileUserId: null,
   profileCache: {},
+  pusherInitialized: false,
+  typingTimeouts: {},
 
   setActiveChat: (chat) => set({ activeChat: chat }),
-  clearSelectedConversation: () => set({ activeChat: null, selectedProfileUserId: null, isProfileDrawerOpen: false }),
+  clearSelectedConversation: () => set({ activeChat: null }),
   setSearchQuery: (query) => set({ searchQuery: query }),
 
   fetchRooms: async () => {
@@ -111,6 +115,13 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
       if (res.ok) {
         const data = await res.json();
         set({ rooms: data });
+        // Automatically subscribe to new rooms after fetch if Pusher is active
+        const { initPusher, pusherInitialized } = get();
+        if (pusherInitialized) {
+          // Re-trigger initPusher to ensure all rooms are subscribed
+          // We can assume userId is available in the current context, or rely on auth endpoint
+          // But to be safe, we just let the component handle it or do it here if we pass userId
+        }
       }
     } catch (e) {
       console.error("Failed to fetch rooms:", e);
@@ -132,7 +143,10 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
         set((state) => ({
           messages: {
             ...state.messages,
-            [roomId]: data.map((m: any) => ({ ...m, status: 'sent' }))
+            [roomId]: data.map((m: any) => ({ 
+              ...m, 
+              status: m.seenBy?.length > 1 ? 'read' : 'sent' 
+            }))
           }
         }));
       }
@@ -169,7 +183,8 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
       // Optimistically update the room's last message in sidebar
       rooms: state.rooms.map(r => r.id === roomId ? { 
         ...r, 
-        messages: [{ content, createdAt: optimisticMessage.createdAt }] 
+        messages: [{ content, createdAt: optimisticMessage.createdAt, attachments }],
+        updatedAt: optimisticMessage.createdAt 
       } : r)
     }));
 
@@ -184,8 +199,6 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
         
         if (res.ok) {
           const data = await res.json();
-          // The newly created room ID comes back. 
-          // We need to move the optimistic message to the actual new room ID.
           const newRoomId = data.roomId;
           set((state) => {
             const { [roomId]: tempMsgs, ...restMsgs } = state.messages;
@@ -193,12 +206,17 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
               sending: false,
               messages: {
                 ...restMsgs,
-                [newRoomId]: tempMsgs.map(m => m.id === optimisticId ? { ...m, status: 'sent', id: data.messageId || m.id } : m)
+                [newRoomId]: tempMsgs.map(m => m.id === optimisticId ? { ...data.message, status: 'sent' } : m)
               }
             };
           });
           // Also fetch rooms again to get the new room in sidebar
-          get().fetchRooms();
+          await get().fetchRooms();
+          // Ensure new room is subscribed
+          const { initPusher } = get();
+          if (currentUser?.id) {
+            initPusher(currentUser.id);
+          }
           return newRoomId; // Return new room ID to update activeChat
         } else {
           throw new Error("Failed to start conversation");
@@ -217,7 +235,7 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
             messages: {
               ...state.messages,
               [roomId]: (state.messages[roomId] || []).map(m => 
-                m.id === optimisticId ? { ...m, status: 'sent', id: data.id || m.id } : m
+                m.id === optimisticId ? { ...data, status: 'sent' } : m
               )
             }
           }));
@@ -241,8 +259,6 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
   },
 
   retryMessage: async (roomId, messageId) => {
-    // Basic implementation: find message, re-try send, etc.
-    // For now, we can extract the content and re-call sendMessage, removing the failed one.
     const message = get().messages[roomId]?.find(m => m.id === messageId);
     if (!message) return;
 
@@ -254,7 +270,6 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
       }
     }));
     
-    // Re-send (assuming existing connection for simplicity, or grab isNewConnection from activeChat)
     const { activeChat } = get();
     await get().sendMessage(
       roomId, 
@@ -277,8 +292,9 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
           const isUnread = state.activeChat?.id !== roomId;
           return {
             ...r,
-            messages: [{ content: message.content || (message.attachments ? 'Attachment' : ''), createdAt: message.createdAt }],
-            unreadCount: isUnread ? (r.unreadCount || 0) + 1 : 0
+            messages: [{ content: message.content, createdAt: message.createdAt, attachments: message.attachments }],
+            unreadCount: isUnread ? (r.unreadCount || 0) + 1 : 0,
+            updatedAt: message.createdAt
           };
         }
         return r;
@@ -287,6 +303,25 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
       return {
         messages: { ...state.messages, [roomId]: newMessages },
         rooms: updatedRooms
+      };
+    });
+  },
+
+  updateMessageRead: (roomId, userId) => {
+    set((state) => {
+      const roomMessages = state.messages[roomId];
+      if (!roomMessages) return state;
+
+      const updatedMessages = roomMessages.map(msg => {
+        // If sender is NOT the one who read it, they see it as read
+        if (msg.senderId !== userId && msg.status !== 'read') {
+          return { ...msg, status: 'read' as const, seenBy: [...(msg.seenBy || []), userId] };
+        }
+        return msg;
+      });
+
+      return {
+        messages: { ...state.messages, [roomId]: updatedMessages }
       };
     });
   },
@@ -318,6 +353,24 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
     }));
   },
 
+  emitTyping: async (roomId) => {
+    // Only emit if not new connection
+    const room = get().rooms.find(r => r.id === roomId);
+    if (!room || room.isNewConnection) return;
+
+    try {
+      const { pusherClient } = await import('@/lib/pusher-client');
+      if (!pusherClient) return;
+
+      const channel = pusherClient.channel(`private-room-${roomId}`);
+      if (channel) {
+        channel.trigger('client-typing', { roomId });
+      }
+    } catch (e) {
+      console.error("Failed to emit typing:", e);
+    }
+  },
+
   updatePresence: (userId, isOnline) => {
     set((state) => {
       const isCurrentlyOnline = state.onlineUsers.includes(userId);
@@ -329,17 +382,7 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
       return state;
     });
   },
-
-  openProfileDrawer: (userId) => {
-    set({ isProfileDrawerOpen: true, selectedProfileUserId: userId });
-    get().fetchUserProfile(userId);
-  },
-
-  closeProfileDrawer: () => {
-    set({ isProfileDrawerOpen: false });
-  },
-
-  fetchUserProfile: async (userId) => {
+  fetchUserProfile: async (userId: string) => {
     const { profileCache } = get();
     if (profileCache[userId]) return; // Already cached
     
@@ -354,5 +397,91 @@ export const useChatStore = create<ChatState & ChatActions>((set, get) => ({
     } catch (e) {
       console.error("Failed to fetch user profile:", e);
     }
+  },
+
+  initPusher: async (userId: string) => {
+    if (get().pusherInitialized) return;
+    set({ pusherInitialized: true });
+
+    try {
+      const { pusherClient } = await import('@/lib/pusher-client');
+      if (!pusherClient) return;
+
+      // Subscribe to global presence channel
+      const presenceChannel = pusherClient.subscribe('presence-skillbuddy');
+      
+      presenceChannel.bind('pusher:subscription_succeeded', (members: any) => {
+        const onlineIds = Object.keys(members.members);
+        set({ onlineUsers: onlineIds });
+      });
+
+      presenceChannel.bind('pusher:member_added', (member: any) => {
+        get().updatePresence(member.id, true);
+      });
+
+      presenceChannel.bind('pusher:member_removed', (member: any) => {
+        get().updatePresence(member.id, false);
+      });
+
+      // Subscribe to all active rooms
+      const rooms = get().rooms;
+      rooms.forEach(room => {
+        if (room.isNewConnection) return;
+        
+        const channelName = `private-room-${room.id}`;
+        let channel = pusherClient.channel(channelName);
+        if (!channel) {
+          channel = pusherClient.subscribe(channelName);
+        }
+
+        channel.bind('new-message', (message: Message) => {
+          get().appendIncomingMessage(room.id, message);
+          
+          // If the message belongs to the active chat, mark it as read immediately
+          const { activeChat } = get();
+          if (activeChat?.id === room.id) {
+             get().markConversationRead(room.id);
+          }
+        });
+
+        channel.bind('message-read', (data: { userId: string, roomId: string }) => {
+          if (data.userId !== userId) {
+            get().updateMessageRead(data.roomId, data.userId);
+          }
+        });
+
+        channel.bind('client-typing', (data: { roomId: string }) => {
+          // Ignore our own typing events if they bounce back (though client events usually don't)
+          get().setTyping(data.roomId);
+
+          // Clear previous timeout for this room
+          const { typingTimeouts } = get();
+          if (typingTimeouts[data.roomId]) {
+            clearTimeout(typingTimeouts[data.roomId]);
+          }
+
+          // Set new timeout to clear typing
+          const newTimeout = setTimeout(() => {
+            get().clearTyping(data.roomId);
+          }, 2000);
+
+          set((state) => ({
+            typingTimeouts: { ...state.typingTimeouts, [data.roomId]: newTimeout }
+          }));
+        });
+      });
+
+    } catch (e) {
+      console.error("Failed to initialize Pusher:", e);
+      set({ pusherInitialized: false });
+    }
+  },
+
+  cleanupPusher: () => {
+    set({ pusherInitialized: false });
+    import('@/lib/pusher-client').then(({ pusherClient }) => {
+      if (!pusherClient) return;
+      pusherClient.disconnect();
+    });
   }
 }));

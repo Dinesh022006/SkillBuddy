@@ -97,7 +97,7 @@ export async function POST(req: Request) {
     }
 
     // Create the message
-    await prisma.message.create({
+    const message = await prisma.message.create({
       data: {
         content: content || "",
         roomId: chatRoom.id,
@@ -118,10 +118,16 @@ export async function POST(req: Request) {
             storageProvider: "VERCEL_BLOB"
           }))
         } : undefined
+      },
+      include: {
+        sender: {
+          select: { id: true, name: true, avatarUrl: true, clerkId: true }
+        },
+        attachments: true
       }
     });
 
-    return NextResponse.json({ roomId: chatRoom.id });
+    return NextResponse.json({ roomId: chatRoom.id, message });
   } catch (error) {
     console.error("[CHAT_START_POST]", error);
     if (error instanceof z.ZodError) {

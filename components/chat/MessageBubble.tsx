@@ -4,16 +4,24 @@ import { useState } from "react";
 import { AlertCircle, RefreshCw, Download, FileText, FileArchive, FileType, FileCode, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatMessageTime } from "@/lib/utils/date";
+import { cn } from "@/lib/utils";
 import type { Message, Attachment } from "@/app/(app)/chat/store/useChatStore";
+import { Reply, SmilePlus, MoreHorizontal } from "lucide-react";
 
 interface MessageBubbleProps {
   message: Message;
   isOwn: boolean;
   onRetry: () => void;
   onImageClick: (url: string) => void;
+  onProfileClick?: () => void;
+  highlightQuery?: string;
 }
 
-export function MessageBubble({ message, isOwn, onRetry, onImageClick }: MessageBubbleProps) {
+import { LinkifyText } from "./LinkifyText";
+import { parseUrls } from "@/lib/chat/url-parser";
+import { LinkPreviewCard } from "./LinkPreviewCard";
+
+export function MessageBubble({ message, isOwn, onRetry, onImageClick, onProfileClick, highlightQuery }: MessageBubbleProps) {
   const isFailed = message.status === 'failed';
   const isSending = message.status === 'sending';
 
@@ -83,20 +91,24 @@ export function MessageBubble({ message, isOwn, onRetry, onImageClick }: Message
   };
 
   return (
-    <div className={`flex flex-col ${isOwn ? "items-end" : "items-start"}`}>
-      <div className="flex items-baseline gap-2 mb-1 ml-1">
-        <span className="text-xs text-muted-foreground font-medium">{message.sender?.name}</span>
-        <span className="text-[10px] text-muted-foreground/60">
-          {message.createdAt && formatMessageTime(message.createdAt)}
-        </span>
-      </div>
+    <div id={`message-${message.id}`} className={cn("flex flex-col mb-4", isOwn ? "items-end" : "items-start")}>
+      {!isOwn && (
+        <div className="flex items-baseline gap-2 mb-1 ml-1">
+          <span 
+            className={cn("text-[13px] font-semibold", onProfileClick ? "cursor-pointer hover:underline text-primary" : "text-foreground")} 
+            onClick={onProfileClick}
+          >
+            {message.sender?.name}
+          </span>
+        </div>
+      )}
       
-      <div className="flex items-center gap-2 max-w-[85%]">
+      <div className={cn("flex items-end gap-2 max-w-[85%] group relative", isOwn ? "flex-row-reverse" : "flex-row")}>
         {isOwn && isFailed && (
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-6 w-6 shrink-0 text-destructive"
+            className="h-6 w-6 shrink-0 text-destructive mb-1"
             onClick={onRetry}
             title="Retry sending"
           >
@@ -105,26 +117,66 @@ export function MessageBubble({ message, isOwn, onRetry, onImageClick }: Message
         )}
         
         <div 
-          className={`flex flex-col gap-1 p-1 ${isOwn ? "items-end" : "items-start"} ${isSending ? "opacity-70" : ""}`}
+          className={cn(
+            "flex flex-col relative", 
+            isSending ? "opacity-70" : ""
+          )}
         >
+          {/* Action Bar (Hover) */}
+          <div className={cn(
+            "absolute top-0 -mt-8 hidden group-hover:flex items-center bg-background border shadow-sm rounded-md px-1 py-0.5 z-10 animate-in fade-in zoom-in duration-200",
+            isOwn ? "right-0" : "left-0"
+          )}>
+            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted"><Reply className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted"><SmilePlus className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted"><MoreHorizontal className="h-4 w-4" /></Button>
+          </div>
+
           {/* Text Content */}
           {message.content && (
             <div 
-              className={`px-4 py-2 rounded-2xl ${
+              className={cn(
+                "px-3 pt-2 pb-6 min-w-[80px] rounded-2xl relative text-[15px] leading-relaxed",
                 isOwn 
                   ? isFailed 
                     ? "bg-destructive/10 text-destructive border border-destructive/20 rounded-br-none"
-                    : "bg-primary text-primary-foreground rounded-br-none" 
-                  : "bg-muted rounded-bl-none"
-              }`}
+                    : "bg-primary text-primary-foreground rounded-br-none shadow-sm" 
+                  : "bg-muted text-foreground rounded-bl-none shadow-sm"
+              )}
             >
-              {message.content}
+              <LinkifyText text={message.content} highlightQuery={highlightQuery} />
+              
+              {/* Conditional Rich Link Preview */}
+              {(() => {
+                const urls = parseUrls(message.content || "");
+                const hasAttachments = message.attachments && message.attachments.length > 0;
+                
+                if (urls.length === 1 && !hasAttachments) {
+                  return (
+                    <div className="mt-2 mb-1">
+                      <LinkPreviewCard url={urls[0].url} />
+                    </div>
+                  );
+                }
+                return null;
+              })()}
+              
+              <div className="absolute bottom-1 right-2 flex items-center gap-1">
+                <span className={cn("text-[10px]", isOwn ? "text-primary-foreground/70" : "text-muted-foreground/70")}>
+                  {message.createdAt && formatMessageTime(message.createdAt)}
+                </span>
+                {isOwn && !isFailed && !isSending && (
+                  <span className={cn("text-[10px] ml-0.5", message.status === 'read' ? "text-blue-300" : "text-primary-foreground/70")}>
+                    {message.status === 'read' ? '✓✓' : '✓'}
+                  </span>
+                )}
+              </div>
             </div>
           )}
 
           {/* Attachments */}
           {message.attachments && message.attachments.length > 0 && (
-            <div className={`flex flex-wrap gap-2 ${isOwn ? "justify-end" : "justify-start"} ${message.content ? "mt-1" : ""}`}>
+            <div className={cn("flex flex-wrap gap-2", isOwn ? "justify-end" : "justify-start", message.content ? "mt-1" : "")}>
               {message.attachments.map(renderAttachment)}
             </div>
           )}
@@ -132,7 +184,7 @@ export function MessageBubble({ message, isOwn, onRetry, onImageClick }: Message
       </div>
       
       {isOwn && isFailed && (
-        <span className="text-[10px] text-destructive mt-1 mr-1 flex items-center gap-1">
+        <span className="text-[11px] text-destructive mt-1 mr-1 flex items-center gap-1 font-medium">
           <AlertCircle className="h-3 w-3" /> Failed to send
         </span>
       )}

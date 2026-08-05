@@ -21,14 +21,15 @@ export async function GET(_req: Request) {
       include: {
         participants: {
           include: {
-            user: { select: { id: true, name: true, avatarUrl: true } }
+            user: { select: { id: true, name: true, avatarUrl: true, clerkId: true, lastSeen: true } }
           }
         },
         messages: {
           orderBy: { createdAt: 'desc' },
           take: 1,
           include: {
-            sender: { select: { name: true } }
+            sender: { select: { name: true } },
+            attachments: true
           }
         },
         team: { select: { name: true } },
@@ -56,8 +57,8 @@ export async function GET(_req: Request) {
         ]
       },
       include: {
-        requester: { select: { id: true, name: true, avatarUrl: true } },
-        receiver: { select: { id: true, name: true, avatarUrl: true } }
+        requester: { select: { id: true, name: true, avatarUrl: true, clerkId: true, lastSeen: true } },
+        receiver: { select: { id: true, name: true, avatarUrl: true, clerkId: true, lastSeen: true } }
       }
     });
 

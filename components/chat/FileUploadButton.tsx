@@ -25,6 +25,7 @@ export function FileUploadButton({ onFilesSelected, disabled }: FileUploadButton
   return (
     <>
       <input
+        id="chat-file-upload"
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}

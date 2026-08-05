@@ -44,6 +44,7 @@ export function validateFile(file: File): string | null {
 }
 
 import { upload } from '@vercel/blob/client';
+import { generateUniqueBlobName } from './generateUniqueBlobName';
 
 export async function uploadToVercelBlob(
   file: File,
@@ -51,7 +52,9 @@ export async function uploadToVercelBlob(
   signal?: AbortSignal
 ): Promise<UploadedFile> {
   try {
-    const blob = await upload(file.name, file, {
+    const uniquePath = generateUniqueBlobName(file.name);
+    
+    const blob = await upload(uniquePath, file, {
       access: 'public',
       handleUploadUrl: '/api/blob/upload',
       abortSignal: signal,

@@ -18,6 +18,7 @@ model User {
   avatarUrl    String?
   imageUrl     String?
   lastSignInAt DateTime?
+  lastSeen     DateTime?
   deletedAt    DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt

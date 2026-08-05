@@ -18,6 +18,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ userId: 
         name: true,
         username: true,
         avatarUrl: true,
+        lastSeen: true,
+        email: true,
+        clerkId: true,
         profile: {
           include: {
             skills: { include: { skill: true } },

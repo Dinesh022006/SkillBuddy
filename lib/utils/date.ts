@@ -35,3 +35,17 @@ export function formatMessageDivider(dateInput: Date | string): string {
   
   return format(date, "MMMM d, yyyy");
 }
+
+export function formatLastSeen(dateInput: Date | string): string {
+  if (!dateInput) return "Last seen recently";
+  const date = typeof dateInput === "string" ? parseISO(dateInput) : dateInput;
+  
+  const now = new Date();
+  const diffMins = differenceInMinutes(now, date);
+  
+  if (diffMins < 5) return "Last seen just now";
+  if (isToday(date)) return `Last seen today at ${format(date, "h:mm a")}`;
+  if (isYesterday(date)) return `Last seen yesterday at ${format(date, "h:mm a")}`;
+  
+  return `Last seen on ${format(date, "MMM d, yyyy")}`;
+}
